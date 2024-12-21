@@ -1,7 +1,7 @@
 -- Kreiranje baze za "Pametni raspored" naziva "ScheduleIT"
 
 -- 1. Tablica za profesore
-CREATE TABLE profesori (
+CREATE TABLE profesor (
     id SERIAL PRIMARY KEY,
     ime VARCHAR(100) NOT NULL,
     prezime VARCHAR(100) NOT NULL,
@@ -10,57 +10,62 @@ CREATE TABLE profesori (
 );
 
 -- 2. Tablica za studije
-CREATE TABLE studiji (
+CREATE TABLE studij (
     id SERIAL PRIMARY KEY,
     naziv VARCHAR(150) NOT NULL
 );
 
--- 3. Tablica za predmete
-CREATE TABLE predmeti (
+-- 3. Tablica za kolegije
+CREATE TABLE kolegij (
     id SERIAL PRIMARY KEY,
     naziv VARCHAR(150) NOT NULL,
-    studij_id INT NOT NULL REFERENCES studiji(id),
-    profesor_id INT NOT NULL REFERENCES profesori(id)
+    studij_id INT NOT NULL REFERENCES studij(id),
+    profesor_id INT NOT NULL REFERENCES profesor(id)  -- Ovo je za predavanja, može biti NULL za m:n
 );
 
 -- 4. Tablica za grupe
-CREATE TABLE grupe (
+CREATE TABLE grupa (
     id SERIAL PRIMARY KEY,
-    naziv VARCHAR(50) NOT NULL,
-    predmet_id INT NOT NULL REFERENCES predmeti(id)
+    naziv VARCHAR(50) NOT NULL
 );
 
--- 5. Tablica za studente
-CREATE TABLE studenti (
+-- 5. Tablica M:N
+CREATE TABLE kolegij_grupa_profesor (
+    id SERIAL PRIMARY KEY,
+    kolegij_id INT NOT NULL REFERENCES kolegij(id),
+    grupa_id INT NOT NULL REFERENCES grupa(id),
+    profesor_id INT NOT NULL REFERENCES profesor(id),
+    UNIQUE(kolegij_id, grupa_id, profesor_id)  -- Osigurava jedinstvenost odnosa
+);
+
+-- 6. Tablica za studente
+CREATE TABLE student (
     id SERIAL PRIMARY KEY,
     ime VARCHAR(100) NOT NULL,
     prezime VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     lozinka VARCHAR(255) NOT NULL,
-    studij_id INT NOT NULL REFERENCES studiji(id),
-    grupa_id INT REFERENCES grupe(id)
+    studij_id INT NOT NULL REFERENCES studij(id),
+    grupa_id INT REFERENCES grupa(id)
 );
 
--- 6. Tablica za raspored
-CREATE TABLE raspored (
+-- 7. Tablica za prostorije
+CREATE TABLE prostorija (
     id SERIAL PRIMARY KEY,
-    predmet_id INT NOT NULL REFERENCES predmeti(id),
-    grupa_id INT REFERENCES grupe(id),
+    naziv VARCHAR(150) NOT NULL
+);
+
+-- 8. Tablica za termin
+CREATE TABLE termin (
+    id SERIAL PRIMARY KEY,
+    kolegij_id INT NOT NULL REFERENCES kolegij(id),
+    grupa_id INT REFERENCES grupa(id),
+    prostorija_id INT NOT NULL REFERENCES prostorija(id),
     pocetak TIMESTAMP NOT NULL,
-    kraj TIMESTAMP NOT NULL,
-    lokacija VARCHAR(100) NOT NULL
+    kraj TIMESTAMP NOT NULL
 );
 
--- 7. Tablica za izostanke
-CREATE TABLE izostanci (
-    id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES studenti(id),
-    predmet_id INT NOT NULL REFERENCES predmeti(id),
-    datum DATE NOT NULL,
-    razlog TEXT
-);
-
--- 8. Tablica za chat poruke
+-- 9. Tablica za chat poruke
 CREATE TABLE chat (
     id SERIAL PRIMARY KEY,
     posiljatelj_id INT NOT NULL, -- Može biti student ili profesor
@@ -70,7 +75,6 @@ CREATE TABLE chat (
 );
 
 -- Dodavanje ograničenja za referencijalni integritet i indekse
-CREATE INDEX idx_raspored_predmet ON raspored(predmet_id);
-CREATE INDEX idx_izostanci_student ON izostanci(student_id);
+CREATE INDEX idx_termin_kolegij ON termin(kolegij_id);
 CREATE INDEX idx_chat_posiljatelj ON chat(posiljatelj_id);
 CREATE INDEX idx_chat_primatelj ON chat(primatelj_id);
