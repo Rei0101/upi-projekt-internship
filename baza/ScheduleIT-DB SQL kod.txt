@@ -1,0 +1,76 @@
+-- Kreiranje baze za "Pametni raspored" naziva "ScheduleIT"
+
+-- 1. Tablica za profesore
+CREATE TABLE profesori (
+    id SERIAL PRIMARY KEY,
+    ime VARCHAR(100) NOT NULL,
+    prezime VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    lozinka VARCHAR(255) NOT NULL
+);
+
+-- 2. Tablica za studije
+CREATE TABLE studiji (
+    id SERIAL PRIMARY KEY,
+    naziv VARCHAR(150) NOT NULL
+);
+
+-- 3. Tablica za predmete
+CREATE TABLE predmeti (
+    id SERIAL PRIMARY KEY,
+    naziv VARCHAR(150) NOT NULL,
+    studij_id INT NOT NULL REFERENCES studiji(id),
+    profesor_id INT NOT NULL REFERENCES profesori(id)
+);
+
+-- 4. Tablica za grupe
+CREATE TABLE grupe (
+    id SERIAL PRIMARY KEY,
+    naziv VARCHAR(50) NOT NULL,
+    predmet_id INT NOT NULL REFERENCES predmeti(id)
+);
+
+-- 5. Tablica za studente
+CREATE TABLE studenti (
+    id SERIAL PRIMARY KEY,
+    ime VARCHAR(100) NOT NULL,
+    prezime VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    lozinka VARCHAR(255) NOT NULL,
+    studij_id INT NOT NULL REFERENCES studiji(id),
+    grupa_id INT REFERENCES grupe(id)
+);
+
+-- 6. Tablica za raspored
+CREATE TABLE raspored (
+    id SERIAL PRIMARY KEY,
+    predmet_id INT NOT NULL REFERENCES predmeti(id),
+    grupa_id INT REFERENCES grupe(id),
+    pocetak TIMESTAMP NOT NULL,
+    kraj TIMESTAMP NOT NULL,
+    lokacija VARCHAR(100) NOT NULL
+);
+
+-- 7. Tablica za izostanke
+CREATE TABLE izostanci (
+    id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES studenti(id),
+    predmet_id INT NOT NULL REFERENCES predmeti(id),
+    datum DATE NOT NULL,
+    razlog TEXT
+);
+
+-- 8. Tablica za chat poruke
+CREATE TABLE chat (
+    id SERIAL PRIMARY KEY,
+    posiljatelj_id INT NOT NULL, -- Može biti student ili profesor
+    primatelj_id INT NOT NULL, -- Može biti student ili profesor
+    poruka TEXT NOT NULL,
+    vrijeme TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Dodavanje ograničenja za referencijalni integritet i indekse
+CREATE INDEX idx_raspored_predmet ON raspored(predmet_id);
+CREATE INDEX idx_izostanci_student ON izostanci(student_id);
+CREATE INDEX idx_chat_posiljatelj ON chat(posiljatelj_id);
+CREATE INDEX idx_chat_primatelj ON chat(primatelj_id);
