@@ -61,6 +61,7 @@ CREATE TABLE termin (
     kolegij_id INT NOT NULL REFERENCES kolegij(id),
     grupa_id INT REFERENCES grupa(id),
     prostorija_id INT NOT NULL REFERENCES prostorija(id),
+	dan_u_tjednu VARCHAR(20) NOT NULL,
     pocetak TIMESTAMP NOT NULL,
     kraj TIMESTAMP NOT NULL
 );
