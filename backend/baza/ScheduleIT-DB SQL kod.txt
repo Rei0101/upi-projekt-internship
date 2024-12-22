@@ -19,8 +19,7 @@ CREATE TABLE studij (
 CREATE TABLE kolegij (
     id SERIAL PRIMARY KEY,
     naziv VARCHAR(150) NOT NULL,
-    studij_id INT NOT NULL REFERENCES studij(id),
-    profesor_id INT NOT NULL REFERENCES profesor(id)  -- Ovo je za predavanja, može biti NULL za m:n
+    studij_id INT NOT NULL REFERENCES studij(id)
 );
 
 -- 4. Tablica za grupe
@@ -46,7 +45,7 @@ CREATE TABLE student (
     email VARCHAR(150) UNIQUE NOT NULL,
     lozinka VARCHAR(255) NOT NULL,
     studij_id INT NOT NULL REFERENCES studij(id),
-    grupa_id INT REFERENCES grupa(id)
+    grupa_id INT NOT NULL REFERENCES grupa(id)
 );
 
 -- 7. Tablica za prostorije
@@ -59,11 +58,11 @@ CREATE TABLE prostorija (
 CREATE TABLE termin (
     id SERIAL PRIMARY KEY,
     kolegij_id INT NOT NULL REFERENCES kolegij(id),
-    grupa_id INT REFERENCES grupa(id),
+    grupa_id INT NOT NULL REFERENCES grupa(id),
     prostorija_id INT NOT NULL REFERENCES prostorija(id),
 	dan_u_tjednu VARCHAR(20) NOT NULL,
-    pocetak TIMESTAMP NOT NULL,
-    kraj TIMESTAMP NOT NULL
+    pocetak TIME NOT NULL,
+    kraj TIME NOT NULL
 );
 
 -- 9. Tablica za chat poruke
