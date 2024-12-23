@@ -12,7 +12,7 @@ Sada imaju dva način za učitavanje ove baze
 						
 						ili
 
-5.2 Desni klik na kreiranu bazu --> Query Tool --> Copy paste podatke iz file-a "ScheduleIT-DB SQL kod"
+5.2 Desni klik na kreiranu bazu --> Query Tool --> Copy paste podatke iz fileova "ScheduleIT-DB SQL kod" i "mock unosi"
 
 
 6. Provjerite dali su učitane tablice (ime_baze --> Schemas --> public --> Tables)
