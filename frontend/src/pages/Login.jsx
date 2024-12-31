@@ -16,22 +16,22 @@ function Login() {
     }
 
     try {
-
-      const response = await axios.post('https://tvoj-backend-api.com/login', {
+      const response = await axios.post("http://localhost:3000/login", {
         username,
-        password
+        password,
       });
-
+  
       const data = response.data;
-
+  
       if (data.success) {
-        window.location.href = '/raspored';
+        // Uspješna prijava
+        window.location.href = "/raspored";
       } else {
-        setError('Neispravno korisničko ime ili lozinka!');
+        setError(data.message || "Neispravno korisničko ime ili lozinka!"); //Preskoči ovaj dio iako je neispravna lozinka i ime
       }
     } catch (error) {
-      setError('Došlo je do pogreške, pokušaj ponovno!');
-      console.log(error);
+      setError("Došlo je do pogreške, pokušaj ponovno!");
+      console.error(error);
     }
   };
 
