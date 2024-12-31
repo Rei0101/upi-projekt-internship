@@ -1,8 +1,7 @@
 // App.jsx
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './pages/Login'; // Login komponenta
-import Dashboard from './pages/Dashboard'; // Dashboard komponenta, opcionalno 
+import Raspored from './pages/Raspored'; // Raspored komponenta
 import './App.css';
 
 function App() {
@@ -11,7 +10,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Login />} /> {/* Putanja za Login stranicu */}
-          <Route path="/dashboard" element={<Dashboard />} /> {/* Putanja za Dashboard */}
+          <Route path="/raspored" element={<Raspored />} /> {/* Putanja za Dashboard */}
         </Routes>
       </div>
     </Router>
