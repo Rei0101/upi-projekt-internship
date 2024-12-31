@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 
-const exportToPDF = (schedule) => {
+export const exportToPDF = (schedule) => {
   const doc = new jsPDF();
   // Add schedule to the PDF
   doc.text('Schedule', 10, 10);
