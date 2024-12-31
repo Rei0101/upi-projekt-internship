@@ -14,11 +14,12 @@ h2 {
   font-size: 32px;
   color: #fff;
   margin-bottom: 20px;
+  margin-right: 25px;
   text-align: center;
   font-weight: bold;
   text-transform: uppercase; 
   background: linear-gradient(45deg, #ff5e62, #ff9966); 
-  -webkit-background-clip: text; 
+  background-clip: text;
   color: transparent; 
   padding: 5px;
   display: inline-block;

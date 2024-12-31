@@ -1,5 +1,6 @@
 // pages/Login.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
+import axios from 'axios';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -15,22 +16,22 @@ function Login() {
     }
 
     try {
-      const response = await fetch('https://tvoj-backend-api.com/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+
+      const response = await axios.post('https://tvoj-backend-api.com/login', {
+        username,
+        password
       });
-      const data = await response.json();
+
+      const data = response.data;
 
       if (data.success) {
-        window.location.href = '/dashboard'; // Promijeni prema tvojoj stvarnoj ruti
+        window.location.href = '/raspored';
       } else {
         setError('Neispravno korisničko ime ili lozinka!');
       }
     } catch (error) {
       setError('Došlo je do pogreške, pokušaj ponovno!');
+      console.log(error);
     }
   };
 
