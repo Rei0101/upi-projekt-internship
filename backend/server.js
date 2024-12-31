@@ -36,6 +36,8 @@ app.get("/", (req, res) => {
   });
 });
 
+
+//-------------------------------------------------------
 app.get("/:tablica", async (req, res) => {
   const {tablica} = req.params; // za izvući "tablica" parametar iz URL-a
   
@@ -85,6 +87,31 @@ app.get("/:tablica/:id", async (req, res) => {
     console.error("Greška pri dohvaćanju podataka:", error.stack);
 
     return ERROR_CODE.DATABASE_ERROR(res);
+  }
+});
+//-------------------------------------------------------
+
+//Login
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  console.log(`Primljene informacije: ${username} , ${password}`); 
+
+  try {
+    const result = await pool.query(
+      "SELECT * FROM student WHERE email = $1 AND lozinka = $2",
+      [username, password]
+    );
+
+    console.log(result.rows);
+
+    if (result.rows.length > 0) {
+      res.status(200).json({ success: true });
+    } else {
+      res.status(401).json({ success: false });
+    }
+  } catch (error) {
+    console.log(ERROR_CODE.RESOURCE_NOT_FOUND(res))
   }
 });
 
