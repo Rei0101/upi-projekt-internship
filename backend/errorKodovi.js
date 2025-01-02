@@ -6,6 +6,14 @@ function INVALID_TABLE_NAME(res) {
   });
 }
 
+function NOT_AUTHORIZED(res) {
+  return res.status(401).json({
+    success: false,
+    errorCode: "NOT_AUTHORIZED",
+    message: "Dogodila se greška pri provjeri valjanosti."
+  });
+}
+
 function RESOURCE_NOT_FOUND(res) {
   return res.status(404).json({
     success: false,
@@ -25,5 +33,6 @@ function DATABASE_ERROR(res) {
 export {
   INVALID_TABLE_NAME,
   RESOURCE_NOT_FOUND,
-  DATABASE_ERROR
+  DATABASE_ERROR,
+  NOT_AUTHORIZED
 }
