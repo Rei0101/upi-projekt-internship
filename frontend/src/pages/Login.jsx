@@ -1,39 +1,16 @@
 // pages/Login.jsx
-import { useState } from 'react';
-import axios from 'axios';
+import Input from "../components/Input";
+import useLogin from "../hooks/useLogin";
 
 function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    if (!username || !password) {
-      setError('Oba polja su obavezna!');
-      return;
-    }
-
-    try {
-      const response = await axios.post("http://localhost:3000/login", {
-        username,
-        password,
-      });
-  
-      const data = response.data;
-  
-      if (data.success) {
-        // Uspješna prijava
-        window.location.href = "/raspored";
-      } else {
-        setError(data.message || "Neispravno korisničko ime ili lozinka!"); //Preskoči ovaj dio iako je neispravna lozinka i ime
-      }
-    } catch (error) {
-      setError("Došlo je do pogreške, pokušaj ponovno!");
-      console.error(error);
-    }
-  };
+  const {
+    username,
+    setUsername,
+    password,
+    setPassword,
+    error,
+    handleLogin,
+  } = useLogin();
 
   return (
     <div className="login-container">
@@ -41,22 +18,20 @@ function Login() {
       <form onSubmit={handleLogin}>
         <div className="input-group">
           <label htmlFor="username">Korisničko ime:</label>
-          <input
+          <Input
             type="text"
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
+            change={(e) => setUsername(e.target.value)}
           />
         </div>
         <div className="input-group">
           <label htmlFor="password">Lozinka:</label>
-          <input
+          <Input
             type="password"
             id="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            change={(e) => setPassword(e.target.value)}
           />
         </div>
         {error && <p className="error-message">{error}</p>}
