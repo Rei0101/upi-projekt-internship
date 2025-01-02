@@ -36,8 +36,8 @@ app.get("/", (req, res) => {
   });
 });
 
-
 //-------------------------------------------------------
+
 app.get("/:tablica", async (req, res) => {
   const {tablica} = req.params; // za izvući "tablica" parametar iz URL-a
   
@@ -72,7 +72,7 @@ app.get("/:tablica/:id", async (req, res) => {
   }
 
   try {
-    // način dohvaćanja pomoću $1 se koristi samo za vrijednosti ne za imena tablica i stupaca
+    // način dohvaćanja pomoću $1 se koristi samo za vrijednosti, ne za imena tablica i stupaca
     // više je ovaj način preporučen kad se dohvaća preko upita zbog sigurnosti
     const queryRes = await pool.query(`SELECT * FROM ${tablica} WHERE id = $1`, [id]);
     
@@ -89,13 +89,12 @@ app.get("/:tablica/:id", async (req, res) => {
     return ERROR_CODE.DATABASE_ERROR(res);
   }
 });
-//-------------------------------------------------------
 
-//Login
+//-------------------------------------------------------
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  console.log(`Primljene informacije: ${username} , ${password}`); 
+  console.log(`Primljene informacije: ${username}, ${password}`); 
 
   try {
     const result = await pool.query(
@@ -108,7 +107,7 @@ app.post("/login", async (req, res) => {
     if (result.rows.length > 0) {
       res.status(200).json({ success: true });
     } else {
-      res.status(401).json({ success: false });
+      return ERROR_CODE.NOT_AUTHORIZED(res);
     }
   } catch (error) {
     console.log(ERROR_CODE.RESOURCE_NOT_FOUND(res))
