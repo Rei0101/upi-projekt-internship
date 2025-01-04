@@ -1,20 +1,22 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
-export default function Input({type, id, value, change}) {
-    return (
-        <input
-            type={type}
-            id={id}
-            value={value}
-            onChange={change}
-            required
-          />
-    );
+export default function Input({ type, id, value, onChange, placeholder }) {
+  return (
+    <input
+      type={type}
+      id={id}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required
+    />
+  );
 }
 
 Input.propTypes = {
-    type: PropTypes.string,
-    id: PropTypes.string,
-    value: PropTypes.string,
-    change: PropTypes.func,
-}
+  type: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string.isRequired,
+};
