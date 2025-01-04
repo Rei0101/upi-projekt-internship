@@ -6,6 +6,7 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const[showpassword,setshowpassword]=useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -47,18 +48,29 @@ function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            placeholder='unesite korisničko ime'
           />
         </div>
         <div className="input-group">
           <label htmlFor="password">Lozinka:</label>
           <input
-            type="password"
+            type={showpassword?"text":"password"}
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            placeholder='unesite lozinku'
           />
+          <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setshowpassword(!showpassword)}
+            >
+              {showpassword ? "Sakrij" : "Prikaži"}
+          </button>
+          
         </div>
+        
         {error && <p className="error-message">{error}</p>}
         <button type="submit">Prijavi se</button>
       </form>
