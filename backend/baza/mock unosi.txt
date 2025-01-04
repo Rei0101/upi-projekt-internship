@@ -85,35 +85,35 @@ INSERT INTO prostorija (naziv) VALUES
 -- 8. Termini (početci termina su promijenjeni na 15 minuta nakon punih sati)
 INSERT INTO termin (kolegij_id, grupa_id, prostorija_id, dan_u_tjednu, pocetak, kraj) VALUES
 -- Osnove programiranja - Predavanja (Grupa A)
-(1, 1, 1, 'Ponedjeljak', '08:15', '10:15'),
+(1, 1, 1, 'Ponedjeljak', '08:15', '10:00'),
 -- Osnove programiranja - Vježbe (Grupa A)
-(2, 1, 2, 'Utorak', '10:15', '12:15'),
+(2, 1, 2, 'Utorak', '10:15', '12:00'),
 -- Osnove programiranja - Vježbe (Grupa B)
-(2, 2, 2, 'Srijeda', '12:15', '14:15'),
+(2, 2, 2, 'Srijeda', '12:15', '14:00'),
 -- Mikroekonomija - Predavanja (Grupa B)
-(3, 2, 3, 'Ponedjeljak', '08:15', '10:15'),
+(3, 2, 3, 'Ponedjeljak', '08:15', '10:00'),
 -- Mikroekonomija - Vježbe (Grupa B)
-(4, 2, 4, 'Utorak', '10:15', '12:15'),
+(4, 2, 4, 'Utorak', '10:15', '12:00'),
 -- Algoritmi i strukture podataka - Predavanja (Grupa A)
-(5, 1, 1, 'Ponedjeljak', '08:15', '10:15'),
+(5, 1, 1, 'Ponedjeljak', '08:15', '10:00'),
 -- Algoritmi i strukture podataka - Vježbe (Grupa A)
-(6, 1, 3, 'Srijeda', '10:15', '12:15'),
+(6, 1, 3, 'Srijeda', '10:15', '12:00'),
 -- Algoritmi i strukture podataka - Vježbe (Grupa D)
-(6, 4, 4, 'Četvrtak', '12:15', '14:15'),
+(6, 4, 4, 'Četvrtak', '12:15', '14:00'),
 -- Baze podataka - Predavanja (Grupa A)
-(7, 1, 1, 'Ponedjeljak', '08:15', '10:15'),
+(7, 1, 1, 'Ponedjeljak', '08:15', '10:00'),
 -- Baze podataka - Vježbe (Grupa A)
-(8, 1, 2, 'Utorak', '10:15', '12:15'),
+(8, 1, 2, 'Utorak', '10:15', '12:00'),
 -- Baze podataka - Vježbe (Grupa E)
-(8, 5, 5, 'Srijeda', '12:15', '14:15'),
+(8, 5, 5, 'Srijeda', '12:15', '14:00'),
 -- Osnove programiranja - Predavanja (Drugi termin)
-(1, 1, 2, 'Ponedjeljak', '08:15', '10:15'),
+(1, 1, 2, 'Ponedjeljak', '08:15', '10:00'),
 -- Osnove programiranja - Vježbe (Grupa C)
-(2, 3, 2, 'Četvrtak', '10:15', '12:15'),
+(2, 3, 2, 'Četvrtak', '10:15', '12:00'),
 -- Mikroekonomija - Vježbe (Grupa A)
-(4, 1, 4, 'Petak', '10:15', '12:15'),
+(4, 1, 4, 'Petak', '10:15', '12:00'),
 -- Algoritmi i strukture podataka - Predavanja (Grupa B)
-(5, 2, 1, 'Ponedjeljak', '08:15', '10:15');
+(5, 2, 1, 'Ponedjeljak', '08:15', '10:00');
 
 -- 9. Chat poruke
 INSERT INTO chat (posiljatelj_id, primatelj_id, poruka) VALUES

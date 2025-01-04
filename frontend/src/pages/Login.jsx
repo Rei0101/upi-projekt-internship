@@ -1,6 +1,8 @@
 // pages/Login.jsx
 import Input from "../components/Input";
+import Button from "../components/Button";
 import useLogin from "../hooks/useLogin";
+import { useState } from "react";
 
 function Login() {
   const {
@@ -12,6 +14,8 @@ function Login() {
     handleLogin,
   } = useLogin();
 
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="login-container">
       <h2>Prijava</h2>
@@ -22,20 +26,30 @@ function Login() {
             type="text"
             id="username"
             value={username}
-            change={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="unesite korisničko ime"
+            required
           />
         </div>
         <div className="input-group">
           <label htmlFor="password">Lozinka:</label>
           <Input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             value={password}
-            change={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="unesite lozinku"
+            required
+          />
+          <Button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+            text={showPassword ? "Sakrij" : "Prikaži"}
           />
         </div>
         {error && <p className="error-message">{error}</p>}
-        <button type="submit">Prijavi se</button>
+        <Button type="submit" text="Prijavi se" />
       </form>
     </div>
   );
