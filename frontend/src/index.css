@@ -23,6 +23,7 @@ h2 {
   color: transparent; 
   padding: 5px;
   display: inline-block;
+  pointer-events: none;
 }
 
 
