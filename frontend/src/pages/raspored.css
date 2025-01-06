@@ -1,0 +1,112 @@
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+.schedule-container {
+    flex: 2;
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.day-header {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.grid-cell {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.side-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+}
+
+.upcoming-events,
+.todo-list {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upcoming-events h2,
+.todo-list h2 {
+    margin-bottom: 15px;
+}
+
+.upcoming-events ul,
+.todo-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.upcoming-events li,
+.todo-list li {
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    word-wrap: break-word;
+    resize: none;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+.upcoming-events li:last-child,
+.todo-list li:last-child {
+    border-bottom: none;
+}
+
+.task-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    word-wrap: break-word;
+    resize: none;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+.delete-task-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.delete-task-button:hover {
+    background-color: #b02a37;
+}
+
+.todo-list
+{
+    max-width: 400px;
+}
