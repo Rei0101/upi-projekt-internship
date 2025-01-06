@@ -29,7 +29,7 @@ function Login() {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="unesite korisničko ime"
             required
-            placeholder='unesite korisničko ime'
+           
           />
         </div>
         <div className="input-group">
@@ -41,7 +41,7 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="unesite lozinku"
             required
-            placeholder='unesite lozinku'
+          
           />
           <Button
             type="button"
