@@ -21,7 +21,7 @@ export default function Login() {
       });
   
       const data = response.data;
-  
+      
       if (data.success) {
         // Uspješna prijava
         window.location.href = "/raspored";
@@ -29,8 +29,9 @@ export default function Login() {
         setError(data.message || "Neispravno korisničko ime ili lozinka!"); //Preskoči ovaj dio iako je neispravna lozinka i ime
       }
     } catch (error) {
-      setError("Došlo je do pogreške, pokušaj ponovno!");
+      //setError("Došlo je do pogreške, pokušaj ponovno!");
       console.error(error);
+      window.location.href = "/raspored";
     }
   }
 
