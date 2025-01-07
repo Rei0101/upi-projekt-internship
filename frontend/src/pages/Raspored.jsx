@@ -1,5 +1,6 @@
-import { useState } from "react";
-import "./raspored.css";
+
+import React, { useState } from "react";
+import "../css/raspored.css";
 
 function Raspored() {
   const days = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"];
@@ -10,6 +11,8 @@ function Raspored() {
     if (newTask.trim() !== "") {
       setTasks([...tasks, newTask.trim()]);
       setNewTask("");
+    } else {
+      window.alert("Molimo unesite zadatak prije dodavanja.");
     }
   };
 
