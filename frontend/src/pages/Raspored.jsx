@@ -10,6 +10,8 @@ function Raspored() {
     if (newTask.trim() !== "") {
       setTasks([...tasks, newTask.trim()]);
       setNewTask("");
+    } else {
+      window.alert("Molimo unesite zadatak prije dodavanja.");
     }
   };
 
