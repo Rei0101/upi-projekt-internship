@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./raspored.css";
+import "../css/raspored.css";
 
 function Raspored() {
   const days = ["Ponedjeljak", "Utorak", "Srijeda", "Četvrtak", "Petak", "Subota", "Nedjelja"];
