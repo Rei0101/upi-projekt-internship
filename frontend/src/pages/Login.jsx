@@ -43,6 +43,7 @@ function Login() {
             required
           
           />
+          
           <Button
             type="button"
             className="toggle-password"
@@ -50,6 +51,7 @@ function Login() {
             text={showPassword ? "Sakrij" : "Prikaži"}
           />
         </div>
+        
         
         {error && <p className="error-message">{error}</p>}
         <Button type="submit" text="Prijavi se" />
