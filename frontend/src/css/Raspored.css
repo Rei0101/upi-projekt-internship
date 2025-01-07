@@ -50,6 +50,7 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
 }
 
 .upcoming-events h2,
@@ -85,7 +86,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: px solid #ddd;
     word-wrap: break-word;
     resize: none;
     box-sizing: border-box;
