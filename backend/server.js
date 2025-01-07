@@ -17,6 +17,7 @@ const pool = new Pool({
   password: "internship",
   port: 5432,
 });
+
 const dozvoljeneTablice = [
   "chat",
   "grupa",
@@ -114,29 +115,32 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
+
+const PORT = 3000;
+const server = app.listen(PORT, () => {
+  console.log(`Server radi na portu http://localhost:${PORT}`);
+});
+
 // ovo samo služi za uredno gašenje baze kad smo gotovi sa njom
-const shutdown = () => {
-  pool.end()
-    .then(() => {
-        console.log("PostgreSQL pool zatvoren");
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error("Greška pri zatvaranju pool-a:", error);
-        process.exit(1);
+const shutdown = async () => {
+  try {
+    await pool.end();
+    console.log("PostgreSQL pool zatvoren.");  
+    server.close(() => {
+      console.log("Server zatvoren.");
+      process.exit(0);
     });
+  } catch (error) {
+    console.error("Greška pri zatvaranju pool-a:", error);
+    process.exit(1);
+  }
 };
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server radi na portu http://localhost:${PORT}`);
-});
-
-//--------------------------------------------------------------
-
+export {app, server};
 
 //----------------------Termini---------------------------------
 
@@ -211,6 +215,4 @@ app.post("/raspored", async (req, res) => {
     });
   }
 });
-
-//--------------------------------------------------------------
 
