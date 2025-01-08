@@ -12,6 +12,7 @@
     "test:watch": "vitest --coverage --watch"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.5.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
@@ -21,7 +22,9 @@
     "inflight": "^1.0.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.1.1"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.1.1",
+    "redux-thunk": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

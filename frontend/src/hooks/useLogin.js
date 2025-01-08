@@ -25,12 +25,15 @@ export default function Login() {
       if (data.success) {
         // Uspješna prijava
         window.location.href = "/raspored";
+        console.log("uspjeh")
       } else {
+        
         setError(data.message || "Došlo je do pogreške prilikom prijave!"); 
       }
     } catch (error) {
       setError("Neispravno korisničko ime ili lozinka!");
       console.error(error);
+      
     }
   }
 
