@@ -3,12 +3,10 @@ import cors from "cors";
 import pkg from "pg";
 const { Pool } = pkg;
 import * as ERROR_CODE from "./errorKodovi.js";
-
 const app = express();
 app.use(cors());
 app.use(json());
 app.use(express.urlencoded({ extended: true }));
-
 // za ovo ćemo zasad samo lokalnu bazu koristit
 const pool = new Pool({
   user: "postgres",
@@ -201,11 +199,9 @@ app.post("/raspored", async (req, res) => {
       `,
       [studij_id, grupa_id]
     );
-
-    
     res.status(200).json({
       success: true,
-      termini: terminiQuery.rows,
+      termini: terminiQuery.rows
     });
   } catch (error) {
     console.error("Greška:", error);
