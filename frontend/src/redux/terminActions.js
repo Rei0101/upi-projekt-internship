@@ -7,7 +7,7 @@ export const setTerminiInStore = (termini) => ({
 
 export const fetchTermini = (email) => async (dispatch) => {
   try {
-    const response = await axios.post("http://localhost:3000/raspored", { email });
+    const response = await axios.post("http://localhost:3000/api/korisnik/raspored", { email });
     
     if (response.data.success) {
       dispatch(setTerminiInStore(response.data.termini));
