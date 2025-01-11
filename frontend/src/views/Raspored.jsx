@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../css/raspored.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTermini } from "../redux/terminActions";
@@ -31,7 +31,12 @@ function Raspored() {
   };
 
   const mapTerminiToGrid = () => {
+    if (!Array.isArray(termini) || termini.length === 0) {
+      return [];
+    }
+
     const grid = [];
+    
     for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
       grid[dayIndex] = Array(5).fill(null);
       for (const termin of termini) {
