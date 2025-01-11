@@ -6,6 +6,14 @@ function INVALID_TABLE_NAME(res) {
   });
 }
 
+function INVALID_EMAIL(res) {
+  return res.status(400).json({
+    success: false,
+    errorCode: "INVALID_EMAIL",
+    message: "E-mail nije poslan.",
+  });
+}
+
 function NOT_AUTHORIZED(res) {
   return res.status(401).json({
     success: false,
@@ -32,6 +40,7 @@ function DATABASE_ERROR(res) {
 
 export {
   INVALID_TABLE_NAME,
+  INVALID_EMAIL,
   RESOURCE_NOT_FOUND,
   DATABASE_ERROR,
   NOT_AUTHORIZED
