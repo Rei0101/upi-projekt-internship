@@ -3,10 +3,8 @@ import {
   getWelcomeMessage,
   getTablicaData,
   getTablicaById,
-  loginUser,
-  getStudentTimetable,
   getAllowedTables
-} from "../viewModels/raspored.js";
+} from "../viewModels/generalViewModel.js";
 import dozvoljeneTablice from "../utils/dozvoljeneTablice.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
 
@@ -22,13 +20,8 @@ const validateTablica = (req, res, next) => {
 const router = express.Router();
 
 router.get("/", getWelcomeMessage);
-
 router.get("/tablice", getAllowedTables);
 router.get("/tablice/:tablica", validateTablica, getTablicaData);
 router.get("/tablice/:tablica/:id", validateTablica, getTablicaById);
-
-router.post("/login", loginUser);
-
-router.post("/raspored", getStudentTimetable);
 
 export default router;

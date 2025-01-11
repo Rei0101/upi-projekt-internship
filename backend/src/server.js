@@ -1,12 +1,18 @@
 import express from "express";
 import cors from "cors";
-import scheduleRoutes from "./routes/apiRoutes.js";
+import generalRoutes from "./routes/generalRoutes.js";
+import userRoutes from "./routes/korisnikRoutes.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/api", scheduleRoutes);
+
+// općenite API rute
+app.use("/api", generalRoutes);
+
+// user-specific rute
+app.use("/api/korisnik", userRoutes);
 
 const PORT = 3000;
 const server = app.listen(PORT, () => {
