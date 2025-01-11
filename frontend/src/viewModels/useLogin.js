@@ -15,7 +15,7 @@ export default function Login() {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/login", {
+      const response = await axios.post("http://localhost:3000/api/korisnik/login", {
         username,
         password,
       });
