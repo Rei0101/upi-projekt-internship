@@ -125,10 +125,11 @@ const getStudentTimetable = async (req, res) => {
         t.pocetak`,
       [studij_id, grupa_id]
     );
-
+    console.log(terminiQuery);
+    
     res.json({
       success: true,
-      data: terminiQuery,
+      termini: terminiQuery,
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju rasporeda:", error.stack);

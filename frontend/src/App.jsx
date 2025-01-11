@@ -1,7 +1,7 @@
 // App.jsx
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login'; // Login komponenta
-import Raspored from './pages/Raspored'; // Raspored komponenta
+import Login from './views/Login'; // Login komponenta
+import Raspored from './views/Raspored'; // Raspored komponenta
 import './App.css';
 
 function App() {
