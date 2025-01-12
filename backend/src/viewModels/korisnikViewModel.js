@@ -44,7 +44,8 @@ const getStudentTimetable = async (req, res) => {
 
     // Dohvati termine s detaljnim informacijama
     const { studij_id, grupa_id } = studentQuery[0];
-
+    console.log(studij_id, grupa_id);
+    
     const terminiQuery = await queryDatabase(
       `SELECT 
         t.dan_u_tjednu,

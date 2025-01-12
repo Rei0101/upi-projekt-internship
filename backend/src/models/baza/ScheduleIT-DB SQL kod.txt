@@ -51,7 +51,8 @@ CREATE TABLE student (
 -- 7. Tablica za prostorije
 CREATE TABLE prostorija (
     id SERIAL PRIMARY KEY,
-    naziv VARCHAR(150) NOT NULL
+    naziv VARCHAR(150) NOT NULL,
+    kapacitet INT NOT NULL
 );
 
 -- 8. Tablica za termin
@@ -60,7 +61,7 @@ CREATE TABLE termin (
     kolegij_id INT NOT NULL REFERENCES kolegij(id),
     grupa_id INT NOT NULL REFERENCES grupa(id),
     prostorija_id INT NOT NULL REFERENCES prostorija(id),
-	dan_u_tjednu VARCHAR(20) NOT NULL,
+    dan_u_tjednu VARCHAR(20) NOT NULL,
     pocetak TIME NOT NULL,
     kraj TIME NOT NULL
 );

@@ -75,12 +75,12 @@ INSERT INTO student (ime, prezime, email, lozinka, studij_id, grupa_id) VALUES
 ('Lea', 'Milinović', 'lea.milinovic@univ.com', 'lozinka191', 1, 1);
 
 -- 7. Prostorije
-INSERT INTO prostorija (naziv) VALUES
-('Dvorana 1'),
-('Dvorana 2'),
-('Laboratorij A'),
-('Laboratorij B'),
-('Učionica B1-21');
+INSERT INTO prostorija (naziv, kapacitet) VALUES
+('Dvorana 1', 10),
+('Dvorana 2', 7),
+('Laboratorij A', 5),
+('Laboratorij B', 5),
+('Učionica B1-21', 5);
 
 -- 8. Termini (početci termina su promijenjeni na 15 minuta nakon punih sati)
 INSERT INTO termin (kolegij_id, grupa_id, prostorija_id, dan_u_tjednu, pocetak, kraj) VALUES
