@@ -42,3 +42,7 @@ frontend/.env.*.local
 
 # Public folder in frontend (usually, it's fine to keep this folder unless you have unnecessary files)
 frontend/public/
+
+# Ignore coverage folders in both frontend and backend apps
+frontend/coverage/
+backend/coverage/
