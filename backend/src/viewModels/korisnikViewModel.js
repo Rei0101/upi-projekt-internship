@@ -32,19 +32,6 @@ const getStudentTimetable = async (req, res) => {
   }
 
   try {
-    // Pronađi studenta na temelju e-mail-a
-    const studentQuery = await queryDatabase(
-      "SELECT studij_id, grupa_id FROM student WHERE email = $1",
-      [email]
-    );
-
-    if (studentQuery.length === 0) {
-      return ERROR_CODE.RESOURCE_NOT_FOUND(res);
-    }
-
-    // Dohvati termine s detaljnim informacijama
-    const { studij_id, grupa_id } = studentQuery[0];
-    console.log(studij_id, grupa_id);
     
     const terminiQuery = await queryDatabase(
       `SELECT 
@@ -54,27 +41,29 @@ const getStudentTimetable = async (req, res) => {
         k.naziv AS kolegij_naziv,
         CONCAT(pr.ime, ' ', pr.prezime) AS profesor_ime,
         g.naziv AS grupa_naziv,
-        p.naziv AS prostorija_naziv
+        p.naziv AS prostorija_naziv,
+        p.kapacitet AS prostorija_kapacitet
       FROM termin t
-      JOIN kolegij_grupa_profesor kgp ON t.kolegij_id = kgp.kolegij_id AND t.grupa_id = kgp.grupa_id
-      JOIN profesor pr ON kgp.profesor_id = pr.id
-      JOIN kolegij k ON t.kolegij_id = k.id
-      JOIN grupa g ON t.grupa_id = g.id
-      JOIN prostorija p ON t.prostorija_id = p.id
-      WHERE k.studij_id = $1 AND t.grupa_id = $2
+        JOIN kolegij_grupa_profesor kgp ON t.kolegij_id = kgp.kolegij_id AND t.grupa_id = kgp.grupa_id
+        JOIN profesor pr ON kgp.profesor_id = pr.id
+        JOIN kolegij k ON t.kolegij_id = k.id
+        JOIN grupa g ON t.grupa_id = g.id
+        JOIN prostorija p ON t.prostorija_id = p.id
+        JOIN student_kolegij_grupa skg ON kgp.kolegij_id = skg.kolegij_id AND kgp.grupa_id = skg.grupa_id
+        JOIN student s ON skg.student_id = s.id
+      WHERE s.email = $1
       ORDER BY
-        CASE 
-          WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
-          WHEN t.dan_u_tjednu = 'Utorak' THEN 2
-          WHEN t.dan_u_tjednu = 'Srijeda' THEN 3
-          WHEN t.dan_u_tjednu = 'Četvrtak' THEN 4
-          WHEN t.dan_u_tjednu = 'Petak' THEN 5
-          ELSE 6
-        END,
-        t.pocetak`,
-      [studij_id, grupa_id]
+      CASE 
+        WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
+        WHEN t.dan_u_tjednu = 'Utorak' THEN 2
+        WHEN t.dan_u_tjednu = 'Srijeda' THEN 3
+        WHEN t.dan_u_tjednu = 'Četvrtak' THEN 4
+        WHEN t.dan_u_tjednu = 'Petak' THEN 5
+        ELSE 6
+      END,
+      t.pocetak`,
+      [email]
     );
-    console.log(terminiQuery);
     
     res.json({
       success: true,
