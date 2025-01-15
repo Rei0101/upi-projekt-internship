@@ -44,8 +44,7 @@ CREATE TABLE student (
     prezime VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     lozinka VARCHAR(255) NOT NULL,
-    studij_id INT NOT NULL REFERENCES studij(id),
-    grupa_id INT NOT NULL REFERENCES grupa(id)
+    studij_id INT NOT NULL REFERENCES studij(id)
 );
 
 -- 7. Tablica za prostorije
@@ -55,7 +54,17 @@ CREATE TABLE prostorija (
     kapacitet INT NOT NULL
 );
 
--- 8. Tablica za termin
+-- 8. Tablica M:N
+CREATE TABLE student_kolegij_grupa (
+    id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES student(id),
+    kolegij_id INT NOT NULL REFERENCES kolegij(id),
+    grupa_id INT NOT NULL REFERENCES grupa(id),
+    tip_kolegija VARCHAR(20) NOT NULL,
+    UNIQUE(student_id, kolegij_id, grupa_id) 
+);
+
+-- 9. Tablica za termin
 CREATE TABLE termin (
     id SERIAL PRIMARY KEY,
     kolegij_id INT NOT NULL REFERENCES kolegij(id),
@@ -63,14 +72,17 @@ CREATE TABLE termin (
     prostorija_id INT NOT NULL REFERENCES prostorija(id),
     dan_u_tjednu VARCHAR(20) NOT NULL,
     pocetak TIME NOT NULL,
-    kraj TIME NOT NULL
+    kraj TIME NOT NULL,
+    CONSTRAINT unique_termin UNIQUE (dan_u_tjednu, prostorija_id, pocetak, kraj)
 );
 
--- 9. Tablica za chat poruke
+-- 10. Tablica za chat poruke
 CREATE TABLE chat (
     id SERIAL PRIMARY KEY,
-    posiljatelj_id INT NOT NULL, -- Može biti student ili profesor
-    primatelj_id INT NOT NULL, -- Može biti student ili profesor
+    posiljatelj_id INT NOT NULL,
+    posiljatelj_tip VARCHAR(20) NOT NULL,
+    primatelj_id INT NOT NULL, 
+    primatelj_tip VARCHAR(20) NOT NULL,
     poruka TEXT NOT NULL,
     vrijeme TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
