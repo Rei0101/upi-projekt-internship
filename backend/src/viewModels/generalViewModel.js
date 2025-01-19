@@ -13,7 +13,7 @@ const getAllowedTables = (req, res) => {
   res.json({
     success: true,
     message: {
-      "dozvoljene tablice": dozvoljeneTablice
+      "dozvoljene tablice": dozvoljeneTablice,
     },
   });
 };
@@ -37,7 +37,9 @@ const getTablicaById = async (req, res) => {
   const { id, tablica } = req.params;
 
   try {
-    const data = await queryDatabase(`SELECT * FROM ${tablica} WHERE id = $1`, [id]);
+    const data = await queryDatabase(`SELECT * FROM ${tablica} WHERE id = $1`, [
+      id,
+    ]);
 
     if (data.length === 0) {
       return res.status(404).json(ERROR_CODE.RESOURCE_NOT_FOUND(res));
@@ -53,9 +55,4 @@ const getTablicaById = async (req, res) => {
   }
 };
 
-export {
-  getWelcomeMessage,
-  getAllowedTables,
-  getTablicaData,
-  getTablicaById,
-};
+export { getWelcomeMessage, getAllowedTables, getTablicaData, getTablicaById };

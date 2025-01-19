@@ -69,11 +69,11 @@ INSERT INTO student (ime, prezime, email, lozinka, studij_id) VALUES
 
 -- 7. Prostorije
 INSERT INTO prostorija (naziv, kapacitet) VALUES
-('Dvorana 1', 15),
-('Dvorana 2', 15),
-('Učionica B2-22', 10),
-('Učionica B3-17', 10),
-('Učionica B1-21', 10);
+('Dvorana 1', 10),
+('Dvorana 2', 10),
+('Učionica B2-22', 5),
+('Učionica B3-17', 5),
+('Učionica B1-21', 5);
 
 -- 8. Povezivanje studenata, kolegija i grupa (Predavanja i Vježbe za sve studente)
 INSERT INTO student_kolegij_grupa (student_id, kolegij_id, grupa_id, tip_kolegija) VALUES

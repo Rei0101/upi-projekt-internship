@@ -2,7 +2,7 @@ function INVALID_TABLE_NAME(res) {
   return res.status(400).json({
     success: false,
     errorCode: "INVALID_TABLE_NAME",
-    message: "Zadana tablica nije dozvoljena."
+    message: "Zadana tablica nije dozvoljena.",
   });
 }
 
@@ -18,7 +18,7 @@ function NOT_AUTHORIZED(res) {
   return res.status(401).json({
     success: false,
     errorCode: "NOT_AUTHORIZED",
-    message: "Dogodila se greška pri provjeri valjanosti."
+    message: "Dogodila se greška pri provjeri valjanosti.",
   });
 }
 
@@ -26,7 +26,7 @@ function RESOURCE_NOT_FOUND(res) {
   return res.status(404).json({
     success: false,
     errorCode: "RESOURCE_NOT_FOUND",
-    message: "U tablici nisu pronađeni traženi podaci."
+    message: "U tablici nisu pronađeni traženi podaci.",
   });
 }
 
@@ -43,5 +43,5 @@ export {
   INVALID_EMAIL,
   RESOURCE_NOT_FOUND,
   DATABASE_ERROR,
-  NOT_AUTHORIZED
-}
+  NOT_AUTHORIZED,
+};
