@@ -3,7 +3,7 @@ import {
   getWelcomeMessage,
   getTablicaData,
   getTablicaById,
-  getAllowedTables
+  getAllowedTables,
 } from "../viewModels/generalViewModel.js";
 import dozvoljeneTablice from "../utils/dozvoljeneTablice.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
@@ -12,9 +12,9 @@ const validateTablica = (req, res, next) => {
   const { tablica } = req.params;
 
   if (!dozvoljeneTablice.includes(tablica)) {
-    return ERROR_CODE.DATABASE_ERROR(res)
+    return ERROR_CODE.DATABASE_ERROR(res);
   }
-  next(); 
+  next();
 };
 
 const router = express.Router();
