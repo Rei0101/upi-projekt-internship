@@ -32,44 +32,72 @@ const getTimetable = async (req, res) => {
   }
 
   try {
+    const userTypeQuery = await queryDatabase(
+      `SELECT 
+      CASE 
+        WHEN EXISTS (SELECT 1 FROM student WHERE email = $1) THEN 'student'
+        WHEN EXISTS (SELECT 1 FROM profesor WHERE email = $1) THEN 'profesor'
+        ELSE NULL
+      END AS user_type`,
+      [email]
+    );
+
+    const userType = userTypeQuery[0]?.user_type;
+
+    if (!userType) {
+      return ERROR_CODE.INVALID_EMAIL(res);
+    }
+
     const terminiQuery = await queryDatabase(
       `SELECT 
-        t.dan_u_tjednu,
-        t.pocetak,
-        t.kraj,
-        k.id AS kolegij_id,
-        k.naziv AS kolegij_naziv,
-        CONCAT(pr.ime, ' ', pr.prezime) AS profesor_ime,
-        g.naziv AS grupa_naziv,
-        p.naziv AS prostorija_naziv,
-        COUNT(s.id) AS popunjenost_kapacitet,
-        p.kapacitet AS prostorija_kapacitet
-      FROM termin t
-        JOIN kolegij_grupa_profesor kgp ON t.kolegij_id = kgp.kolegij_id AND t.grupa_id = kgp.grupa_id
-        JOIN profesor pr ON kgp.profesor_id = pr.id
-        JOIN kolegij k ON t.kolegij_id = k.id
-        JOIN grupa g ON t.grupa_id = g.id
-        JOIN prostorija p ON t.prostorija_id = p.id
-        JOIN student_kolegij_grupa skg ON kgp.kolegij_id = skg.kolegij_id AND kgp.grupa_id = skg.grupa_id
-        JOIN student s ON skg.student_id = s.id
-      WHERE s.email = $1
-      GROUP BY 
-        t.dan_u_tjednu, t.pocetak, t.kraj, k.id, k.naziv, pr.ime, pr.prezime, g.naziv, p.naziv, p.kapacitet
-      ORDER BY
-      CASE 
-        WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
-        WHEN t.dan_u_tjednu = 'Utorak' THEN 2
-        WHEN t.dan_u_tjednu = 'Srijeda' THEN 3
-        WHEN t.dan_u_tjednu = 'Četvrtak' THEN 4
-        WHEN t.dan_u_tjednu = 'Petak' THEN 5
-        ELSE 6
-      END,
-      t.pocetak`,
+          t.dan_u_tjednu,
+          t.pocetak,
+          t.kraj,
+          k.id AS kolegij_id,
+          k.naziv AS kolegij_naziv,
+          CONCAT(pr.ime, ' ', pr.prezime) AS profesor_ime,
+          g.naziv AS grupa_naziv,
+          p.naziv AS prostorija_naziv,
+          COUNT(s.id)::int AS popunjenost_kapacitet,
+          p.kapacitet AS prostorija_kapacitet
+        FROM termin t
+          JOIN kolegij_grupa_profesor kgp 
+            ON t.kolegij_id = kgp.kolegij_id AND t.grupa_id = kgp.grupa_id
+          JOIN profesor pr 
+            ON kgp.profesor_id = pr.id
+          JOIN kolegij k 
+            ON t.kolegij_id = k.id
+          JOIN grupa g 
+            ON t.grupa_id = g.id
+          JOIN prostorija p 
+            ON t.prostorija_id = p.id
+          ${
+            userType === "profesor" ? `LEFT ` : ``
+          }JOIN student_kolegij_grupa skg 
+            ON kgp.kolegij_id = skg.kolegij_id AND kgp.grupa_id = skg.grupa_id
+          ${
+            userType === "profesor" ? `LEFT ` : ``
+          }JOIN student s 
+            ON skg.student_id = s.id
+        WHERE ${userType === "student" ? `s` : `pr`}.email = $1
+        GROUP BY 
+          t.dan_u_tjednu, t.pocetak, t.kraj, k.id, k.naziv, pr.ime, pr.prezime, g.naziv, p.naziv, p.kapacitet
+        ORDER BY
+          CASE 
+            WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
+            WHEN t.dan_u_tjednu = 'Utorak' THEN 2
+            WHEN t.dan_u_tjednu = 'Srijeda' THEN 3
+            WHEN t.dan_u_tjednu = 'Četvrtak' THEN 4
+            WHEN t.dan_u_tjednu = 'Petak' THEN 5
+            ELSE 6
+          END,
+          t.pocetak`,
       [email]
     );
 
     res.json({
       success: true,
+      userType,
       termini: terminiQuery,
     });
   } catch (error) {
