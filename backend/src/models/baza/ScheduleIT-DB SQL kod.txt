@@ -6,7 +6,8 @@ CREATE TABLE profesor (
     ime VARCHAR(100) NOT NULL,
     prezime VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
-    lozinka VARCHAR(255) NOT NULL
+    lozinka VARCHAR(255) NOT NULL,
+    todo_zapis VARCHAR(700) NOT NULL
 );
 
 -- 2. Tablica za studije

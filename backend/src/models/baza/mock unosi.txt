@@ -1,10 +1,10 @@
 -- 1. Profesori 
-INSERT INTO profesor (ime, prezime, email, lozinka) VALUES
-('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123'),
-('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456'),
-('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789'),
-('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321'),
-('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654');
+INSERT INTO profesor (ime, prezime, email, lozinka, todo_zapis) VALUES
+('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123', ''),
+('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456', ''),
+('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789', ''),
+('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321', ''),
+('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654', '');
 
 -- 2. Studiji
 INSERT INTO studij (naziv) VALUES
