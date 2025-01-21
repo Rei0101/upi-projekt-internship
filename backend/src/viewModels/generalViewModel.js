@@ -29,7 +29,7 @@ const getTablicaData = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju podataka:", error.stack);
-    return res.status(500).json(ERROR_CODE.DATABASE_ERROR(res));
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
@@ -42,7 +42,7 @@ const getTablicaById = async (req, res) => {
     ]);
 
     if (data.length === 0) {
-      return res.status(404).json(ERROR_CODE.RESOURCE_NOT_FOUND(res));
+      return ERROR_CODE.RESOURCE_NOT_FOUND(res);
     }
 
     res.json({
@@ -51,7 +51,7 @@ const getTablicaById = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju podataka:", error.stack);
-    return res.status(500).json(ERROR_CODE.DATABASE_ERROR(res));
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 

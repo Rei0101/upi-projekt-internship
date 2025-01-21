@@ -20,34 +20,14 @@ const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri prijavi:", error.stack);
-    return res.status(500).json(ERROR_CODE.DATABASE_ERROR(res));
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
 const getTimetable = async (req, res) => {
-  const { email } = req.body;
+  const {email, userType} = req;
 
-  if (!email) {
-    return ERROR_CODE.INVALID_EMAIL(res);
-  }
-
-  try {
-    const userTypeQuery = await queryDatabase(
-      `SELECT 
-      CASE 
-        WHEN EXISTS (SELECT 1 FROM student WHERE email = $1) THEN 'student'
-        WHEN EXISTS (SELECT 1 FROM profesor WHERE email = $1) THEN 'profesor'
-        ELSE NULL
-      END AS user_type`,
-      [email]
-    );
-
-    const userType = userTypeQuery[0]?.user_type;
-
-    if (!userType) {
-      return ERROR_CODE.INVALID_EMAIL(res);
-    }
-
+  try{
     const terminiQuery = await queryDatabase(
       `SELECT 
           t.dan_u_tjednu,
@@ -102,7 +82,7 @@ const getTimetable = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju rasporeda:", error.stack);
-    return ERROR_CODE.DATABASE_ERROR(res);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
@@ -179,7 +159,7 @@ const getAllGroups = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju svih grupa:", error.stack);
-    return ERROR_CODE.DATABASE_ERROR(res);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
