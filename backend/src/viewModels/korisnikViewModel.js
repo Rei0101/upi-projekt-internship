@@ -187,4 +187,6 @@ const getAllGroups = async (req, res) => {
   }
 };
 
+
+
 export { loginUser, getTimetable, getAllGroups };

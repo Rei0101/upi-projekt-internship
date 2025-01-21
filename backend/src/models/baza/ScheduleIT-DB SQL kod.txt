@@ -44,6 +44,7 @@ CREATE TABLE student (
     prezime VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     lozinka VARCHAR(255) NOT NULL,
+    todo_zapis VARCHAR(700) NOT NULL,
     studij_id INT NOT NULL REFERENCES studij(id)
 );
 
