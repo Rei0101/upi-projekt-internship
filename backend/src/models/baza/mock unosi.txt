@@ -1,10 +1,10 @@
 -- 1. Profesori 
-INSERT INTO profesor (ime, prezime, email, lozinka) VALUES
-('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123'),
-('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456'),
-('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789'),
-('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321'),
-('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654');
+INSERT INTO profesor (ime, prezime, email, lozinka, todo_zapis) VALUES
+('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123', ''),
+('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456', ''),
+('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789', ''),
+('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321', ''),
+('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654', '');
 
 -- 2. Studiji
 INSERT INTO studij (naziv) VALUES
@@ -45,27 +45,27 @@ INSERT INTO kolegij_grupa_profesor (kolegij_id, grupa_id, profesor_id) VALUES
 (8, 2, 1); -- Uvod u programsko inženjerstvo - Vježbe, Grupa B, profesor Marko Marković
 
 -- 6. Studenti
-INSERT INTO student (ime, prezime, email, lozinka, studij_id) VALUES
-('Ivan', 'Ivić', 'ivan.ivic@univ.com', 'lozinka789', 1),
-('Petra', 'Petrović', 'petra.petrovic@univ.com', 'lozinka101', 2),
-('Luka', 'Lukić', 'luka.lukic@univ.com', 'lozinka202', 1),
-('Marija', 'Marić', 'marija.maric@univ.com', 'lozinka303', 2),
-('Ana', 'Klarić', 'ana.klaric@univ.com', 'lozinka404', 1),
-('Josip', 'Jurić', 'josip.juric@univ.com', 'lozinka505', 2),
-('Ema', 'Emić', 'ema.emic@univ.com', 'lozinka606', 1),
-('Karlo', 'Karić', 'karlo.karic@univ.com', 'lozinka707', 2),
-('Dora', 'Novak', 'dora.novak@univ.com', 'lozinka808', 2),
-('Nikola', 'Nikolić', 'nikola.nikolic@univ.com', 'lozinka909', 1),
-('Lucija', 'Klarić', 'lucija.klaric@univ.com', 'lozinka100', 2),
-('Filip', 'Horvat', 'filip.horvat@univ.com', 'lozinka111', 1),
-('Tea', 'Pavić', 'tea.pavic@univ.com', 'lozinka121', 1),
-('Maja', 'Vuković', 'maja.vukovic@univ.com', 'lozinka131', 2),
-('Andrej', 'Babić', 'andrej.babic@univ.com', 'lozinka141', 1),
-('Lana', 'Kovačević', 'lana.kovacevic@univ.com', 'lozinka151', 2),
-('Toni', 'Đurić', 'toni.djuric@univ.com', 'lozinka161', 2),
-('Marta', 'Knežević', 'marta.knezevic@univ.com', 'lozinka171', 1),
-('Mihael', 'Prlić', 'mihael.prlic@univ.com', 'lozinka181', 2),
-('Lea', 'Milinović', 'lea.milinovic@univ.com', 'lozinka191', 1);
+INSERT INTO student (ime, prezime, email, lozinka, todo_zapis, studij_id) VALUES
+('Ivan', 'Ivić', 'ivan.ivic@univ.com', 'lozinka789', '', 1),
+('Petra', 'Petrović', 'petra.petrovic@univ.com', 'lozinka101', '', 2),
+('Luka', 'Lukić', 'luka.lukic@univ.com', 'lozinka202', '', 1),
+('Marija', 'Marić', 'marija.maric@univ.com', 'lozinka303', '', 2),
+('Ana', 'Klarić', 'ana.klaric@univ.com', 'lozinka404', '', 1),
+('Josip', 'Jurić', 'josip.juric@univ.com', 'lozinka505', '', 2),
+('Ema', 'Emić', 'ema.emic@univ.com', 'lozinka606', '', 1),
+('Karlo', 'Karić', 'karlo.karic@univ.com', 'lozinka707', '', 2),
+('Dora', 'Novak', 'dora.novak@univ.com', 'lozinka808', '', 2),
+('Nikola', 'Nikolić', 'nikola.nikolic@univ.com', 'lozinka909', '', 1),
+('Lucija', 'Klarić', 'lucija.klaric@univ.com', 'lozinka100', '', 2),
+('Filip', 'Horvat', 'filip.horvat@univ.com', 'lozinka111', '', 1),
+('Tea', 'Pavić', 'tea.pavic@univ.com', 'lozinka121', '', 1),
+('Maja', 'Vuković', 'maja.vukovic@univ.com', 'lozinka131', '', 2),
+('Andrej', 'Babić', 'andrej.babic@univ.com', 'lozinka141', '', 1),
+('Lana', 'Kovačević', 'lana.kovacevic@univ.com', 'lozinka151', '', 2),
+('Toni', 'Đurić', 'toni.djuric@univ.com', 'lozinka161', '', 2),
+('Marta', 'Knežević', 'marta.knezevic@univ.com', 'lozinka171', '', 1),
+('Mihael', 'Prlić', 'mihael.prlic@univ.com', 'lozinka181', '', 2),
+('Lea', 'Milinović', 'lea.milinovic@univ.com', 'lozinka191', '', 1);
 
 -- 7. Prostorije
 INSERT INTO prostorija (naziv, kapacitet) VALUES

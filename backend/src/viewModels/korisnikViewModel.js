@@ -187,4 +187,23 @@ const getAllGroups = async (req, res) => {
   }
 };
 
-export { loginUser, getTimetable, getAllGroups };
+const updateToDo = async (req, res) => {
+  const { email, userType } = req;
+  const { noviZapis } = req.body;
+
+  try {
+    await queryDatabase(
+      `UPDATE ${userType === "student" ? `student` : `profesor`}
+      SET todo_zapis = $1
+      WHERE email = $2`,
+      [noviZapis, email]
+    );
+
+    res.status(200).json({ message: "Korisniku je ažuriran TODO odjeljak." });
+  } catch (error) {
+    console.error("Greška pri ažuriranju TODO odjeljka:", error.stack);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+}
+
+export { loginUser, getTimetable, getAllGroups, updateToDo };
