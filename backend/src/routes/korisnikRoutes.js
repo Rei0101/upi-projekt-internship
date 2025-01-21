@@ -8,7 +8,7 @@ import userTypeMiddleWare from "../utils/userTypeMiddleWare.js";
 
 const router = express.Router();
 
-router.post("/login", loginUser);
+router.post("/login", userTypeMiddleWare, loginUser);
 router.post("/raspored", userTypeMiddleWare, getTimetable);
 router.post("/sve-grupe/:id?", getAllGroups);
 

@@ -2,12 +2,13 @@ import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
 
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, userType } = req;
+  const { password } = req.body;
 
   try {
     const result = await queryDatabase(
-      "SELECT * FROM student WHERE email = $1 AND lozinka = $2",
-      [username, password]
+      `SELECT * FROM ${userType === `student` ? `student` : `profesor`} WHERE email = $1 AND lozinka = $2`,
+      [email, password]
     );
 
     if (result.length === 0) {

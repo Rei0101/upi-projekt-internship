@@ -2,21 +2,21 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!email || !password) {
       setError('Oba polja su obavezna!');
       return;
     }
 
     try {
       const response = await axios.post("http://localhost:3000/api/korisnik/login", {
-        username,
+        email,
         password,
       });
   
@@ -38,8 +38,8 @@ export default function Login() {
   }
 
   return {
-    username,
-    setUsername,
+    email,
+    setEmail,
     password,
     setPassword,
     error,

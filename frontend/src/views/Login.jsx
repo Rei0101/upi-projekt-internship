@@ -5,8 +5,8 @@ import { useState } from "react";
 
 function Login() {
   const {
-    username,
-    setUsername,
+    email,
+    setEmail,
     password,
     setPassword,
     error,
@@ -20,13 +20,13 @@ function Login() {
       <h2>Prijava</h2>
       <form onSubmit={handleLogin}>
         <div className="input-group">
-          <label htmlFor="username">Korisničko ime:</label>
+          <label htmlFor="email">E-mail:</label>
           <Input
             type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="unesite korisničko ime"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="unesite e-mail"
             required
            
           />
