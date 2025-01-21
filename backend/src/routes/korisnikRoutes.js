@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/login", userTypeMiddleWare, loginUser);
 router.post("/raspored", userTypeMiddleWare, getTimetable);
-router.post("/sve-grupe/:id?", getAllGroups);
+router.post("/sve-grupe/:id?", userTypeMiddleWare, getAllGroups);
 
 export default router;
