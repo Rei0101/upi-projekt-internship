@@ -1,0 +1,48 @@
+# Node.js dependencies (both frontend and backend)
+node_modules/
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables (don't push .env files)
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Frontend build output (Vite, React)
+frontend/dist/
+
+# Frontend .env files
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# IDE/Editor-specific files
+.idea/
+.vscode/
+
+# TypeScript build files (if you're using TS)
+*.tsbuildinfo
+
+# Git hooks
+.husky/
+
+# Public folder in frontend (usually, it's fine to keep this folder unless you have unnecessary files)
+frontend/public/
+
+# Ignore coverage folders in both frontend and backend apps
+frontend/coverage/
+backend/coverage/

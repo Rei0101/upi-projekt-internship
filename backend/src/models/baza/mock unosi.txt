@@ -1,0 +1,197 @@
+-- 1. Profesori 
+INSERT INTO profesor (ime, prezime, email, lozinka) VALUES
+('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123'),
+('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456'),
+('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789'),
+('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321'),
+('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654');
+
+-- 2. Studiji
+INSERT INTO studij (naziv) VALUES
+('Informatika'),
+('Matematika');
+
+-- 3. Kolegiji (profesor_id je uklonjen jer je povezan u kolegij_grupa_profesor)
+INSERT INTO kolegij (naziv, studij_id) VALUES
+('Osnove programiranja - Predavanja', 1),
+('Osnove programiranja - Vježbe', 1),
+('Osnove matematika - Predavanja', 2),
+('Osnove matematike - Vježbe', 2),
+('Linearna algebra - Predavanja', 1),
+('Linearna algebra - Vježbe', 1),
+('Uvod u programsko inženjerstvo - Predavanja', 1),
+('Uvod u programsko inženjerstvo - Vježbe', 1);
+
+-- 4. Grupe
+INSERT INTO grupa (naziv) VALUES
+('Grupa A'),
+('Grupa B'),
+('Grupa C');
+
+-- 5. Povezivanje kolegija, grupa i profesora
+INSERT INTO kolegij_grupa_profesor (kolegij_id, grupa_id, profesor_id) VALUES
+(1, 1, 1), -- Osnove programiranja - Predavanja, Grupa A, profesor Marko Marković
+(2, 1, 1), -- Osnove programiranja - Vježbe, Grupa A, profesor Marko Marković
+(2, 2, 4), -- Osnove programiranja - Vježbe, Grupa B, profesor Tomislav Kovač
+(2, 3, 4), -- Osnove programiranja - Vježbe, Grupa C, profesor Tomislav Kovač
+(3, 1, 2), -- Osnove matematike - Predavanja, Grupa A, profesor Ana Anić
+(4, 1, 2), -- Osnove matematike - Vježbe, Grupa A, profesor Ana Anić
+(4, 2, 2), -- Osnove matematike - Vježbe, Grupa B, profesor Ana Anić
+(5, 1, 3), -- Linearna algebra - Predavanja, Grupa A, profesor Ivana Horvat
+(6, 1, 3), -- Linearna algebra - Vježbe, Grupa A, profesor Ivana Horvat
+(6, 2, 3), -- Linearna algebra - Vježbe, Grupa B, profesor Ivana Horvat
+(7, 1, 1), -- Uvod u programsko inženjerstvo - Predavanja, Grupa A, profesor Marko Marković
+(8, 1, 1), -- Uvod u programsko inženjerstvo - Vježbe, Grupa A, profesor Marko Marković
+(8, 2, 1); -- Uvod u programsko inženjerstvo - Vježbe, Grupa B, profesor Marko Marković
+
+-- 6. Studenti
+INSERT INTO student (ime, prezime, email, lozinka, studij_id) VALUES
+('Ivan', 'Ivić', 'ivan.ivic@univ.com', 'lozinka789', 1),
+('Petra', 'Petrović', 'petra.petrovic@univ.com', 'lozinka101', 2),
+('Luka', 'Lukić', 'luka.lukic@univ.com', 'lozinka202', 1),
+('Marija', 'Marić', 'marija.maric@univ.com', 'lozinka303', 2),
+('Ana', 'Klarić', 'ana.klaric@univ.com', 'lozinka404', 1),
+('Josip', 'Jurić', 'josip.juric@univ.com', 'lozinka505', 2),
+('Ema', 'Emić', 'ema.emic@univ.com', 'lozinka606', 1),
+('Karlo', 'Karić', 'karlo.karic@univ.com', 'lozinka707', 2),
+('Dora', 'Novak', 'dora.novak@univ.com', 'lozinka808', 2),
+('Nikola', 'Nikolić', 'nikola.nikolic@univ.com', 'lozinka909', 1),
+('Lucija', 'Klarić', 'lucija.klaric@univ.com', 'lozinka100', 2),
+('Filip', 'Horvat', 'filip.horvat@univ.com', 'lozinka111', 1),
+('Tea', 'Pavić', 'tea.pavic@univ.com', 'lozinka121', 1),
+('Maja', 'Vuković', 'maja.vukovic@univ.com', 'lozinka131', 2),
+('Andrej', 'Babić', 'andrej.babic@univ.com', 'lozinka141', 1),
+('Lana', 'Kovačević', 'lana.kovacevic@univ.com', 'lozinka151', 2),
+('Toni', 'Đurić', 'toni.djuric@univ.com', 'lozinka161', 2),
+('Marta', 'Knežević', 'marta.knezevic@univ.com', 'lozinka171', 1),
+('Mihael', 'Prlić', 'mihael.prlic@univ.com', 'lozinka181', 2),
+('Lea', 'Milinović', 'lea.milinovic@univ.com', 'lozinka191', 1);
+
+-- 7. Prostorije
+INSERT INTO prostorija (naziv, kapacitet) VALUES
+('Dvorana 1', 10),
+('Dvorana 2', 10),
+('Učionica B2-22', 5),
+('Učionica B3-17', 5),
+('Učionica B1-21', 5);
+
+-- 8. Povezivanje studenata, kolegija i grupa (Predavanja i Vježbe za sve studente)
+INSERT INTO student_kolegij_grupa (student_id, kolegij_id, grupa_id, tip_kolegija) VALUES
+-- Ivan Ivić
+(1, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
+(1, 2, 2, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa B
+(1, 5, 1, 'Predavanje'),  -- Linearna algebra - Predavanja, Grupa A
+(1, 6, 2, 'Vježba'),      -- Linearna algebra - Vježbe, Grupa B
+(1, 7, 1, 'Predavanje'),  -- Uvod u programsko inženjerstvo - Predavanja, Grupa A
+(1, 8, 2, 'Vježba'),      -- Uvod u programsko inženjerstvo - Vježbe, Grupa B
+-- Petra Petrović
+(2, 3, 1, 'Predavanje'),  -- Osnove matematike - Predavanja, Grupa A
+(2, 4, 2, 'Vježba'),      -- Osnove matematike - Vježbe, Grupa B
+(2, 6, 1, 'Vježba'),      -- Linearna algebra - Vježbe, Grupa A
+-- Luka Lukić
+(3, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
+(3, 2, 3, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa C
+(3, 5, 1, 'Predavanje'),  -- Linearna algebra - Predavanja, Grupa A
+(3, 6, 2, 'Vježba'),      -- Linearna algebra - Vježbe, Grupa B
+-- Marija Marić
+(4, 3, 1, 'Predavanje'),  -- Osnove matematike - Predavanja, Grupa A
+(4, 4, 1, 'Vježba'),      -- Osnove matematike - Vježbe, Grupa A
+-- Ana Klarić
+(5, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
+(5, 2, 2, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa B
+(5, 5, 1, 'Predavanje'),  -- Linearna algebra - Predavanja, Grupa A
+-- Josip Jurić
+(6, 3, 1, 'Predavanje'),  -- Osnove matematike - Predavanja, Grupa A
+(6, 4, 2, 'Vježba'),      -- Osnove matematike - Vježbe, Grupa B
+-- Ema Emić
+(7, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
+(7, 2, 3, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa C
+-- Karlo Karić
+(8, 3, 1, 'Predavanje'),  -- Osnove matematike - Predavanja, Grupa A
+(8, 4, 2, 'Vježba'),      -- Osnove matematike - Vježbe, Grupa B
+-- Dora Novak
+(9, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
+(9, 2, 3, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa C
+-- Nikola Nikolić 
+(10, 5, 1, 'Predavanje'), -- Linearna algebra - Predavanja, Grupa A
+(10, 6, 2, 'Vježba'),     -- Linearna algebra - Vježbe, Grupa B
+-- Lucija Klarić
+(11, 3, 1, 'Predavanje'), -- Osnove matematike - Predavanja, Grupa A
+(11, 4, 2, 'Vježba'),     -- Osnove matematike - Vježbe, Grupa B
+-- Filip Horvat
+(12, 1, 1, 'Predavanje'), -- Osnove programiranja - Predavanja, Grupa A
+(12, 2, 2, 'Vježba'),     -- Osnove programiranja - Vježbe, Grupa B
+(12, 5, 1, 'Predavanje'), -- Linearna algebra - Predavanja, Grupa A
+-- Tea Pavić
+(13, 3, 1, 'Predavanje'), -- Osnove matematike - Predavanja, Grupa A
+(13, 4, 2, 'Vježba'),     -- Osnove matematike - Vježbe, Grupa B
+-- Maja Vuković
+(14, 3, 1, 'Predavanje'), -- Osnove matematike - Predavanja, Grupa A
+(14, 4, 1, 'Vježba'),     -- Osnove matematike - Vježbe, Grupa A
+-- Andrej Babić
+(15, 1, 1, 'Predavanje'), -- Osnove programiranja - Predavanja, Grupa A
+(15, 2, 2, 'Vježba'),     -- Osnove programiranja - Vježbe, Grupa B
+-- Lana Kovačević
+(16, 3, 1, 'Predavanje'), -- Osnove matematike - Predavanja, Grupa A
+(16, 4, 2, 'Vježba'),     -- Osnove matematike - Vježbe, Grupa B
+-- Toni Đurić
+(17, 1, 1, 'Predavanje'), -- Osnove programiranja - Predavanja, Grupa A
+(17, 2, 3, 'Vježba'),     -- Osnove programiranja - Vježbe, Grupa C
+-- Marta Knežević
+(18, 5, 1, 'Predavanje'), -- Linearna algebra - Predavanja, Grupa A
+(18, 6, 2, 'Vježba'),     -- Linearna algebra - Vježbe, Grupa B
+-- Mihael Prlić
+(19, 3, 1, 'Predavanje'), -- Osnove matematike - Predavanja, Grupa A
+(19, 4, 2, 'Vježba'),     -- Osnove matematike - Vježbe, Grupa B
+-- Lea Milinović
+(20, 1, 1, 'Predavanje'), -- Osnove programiranja - Predavanja, Grupa A
+(20, 2, 3, 'Vježba');     -- Osnove programiranja - Vježbe, Grupa C
+
+-- 9. Termini (početci termina su promijenjeni na 15 minuta nakon punih sati)
+INSERT INTO termin (kolegij_id, grupa_id, prostorija_id, dan_u_tjednu, pocetak, kraj) VALUES
+-- Osnove programiranja - Predavanja (Grupa A)
+(1, 1, 1, 'Ponedjeljak', '08:15', '10:00'),
+-- Osnove programiranja - Vježbe (Grupa A)
+(2, 1, 2, 'Utorak', '10:15', '12:00'),
+-- Osnove programiranja - Vježbe (Grupa B)
+(2, 2, 2, 'Srijeda', '12:15', '14:00'),
+-- Osnove programiranja - Vježbe (Grupa C)
+(2, 3, 4, 'Četvrtak', '10:15', '12:00'),
+-- Osnove matematike - Predavanja (Grupa A)
+(3, 1, 2, 'Ponedjeljak', '08:15', '10:00'),
+-- Osnove matematike - Vježbe (Grupa A)
+(4, 1, 4, 'Petak', '10:15', '12:00'),
+-- Osnove matematike - Vježbe (Grupa B)
+(4, 2, 5, 'Utorak', '12:15', '14:00'),
+-- Osnove matematike - Vježbe (Grupa C)
+(4, 3, 3, 'Srijeda', '10:15', '12:00'),
+-- Linearna algebra - Predavanja (Grupa A)
+(5, 1, 1, 'Ponedjeljak', '12:15', '14:00'),
+-- Linearna algebra - Vježbe (Grupa A)
+(6, 1, 3, 'Srijeda', '08:15', '10:00'),
+-- Linearna algebra - Vježbe (Grupa B)
+(6, 2, 2, 'Četvrtak', '12:15', '14:00'),
+-- Linearna algebra - Vježbe (Grupa C)
+(6, 3, 4, 'Petak', '08:15', '10:00'),
+-- Uvod u programsko inženjerstvo - Predavanja (Grupa A)
+(7, 1, 5, 'Ponedjeljak', '10:15', '12:00'),
+-- Uvod u programsko inženjerstvo - Vježbe (Grupa A)
+(8, 1, 2, 'Utorak', '14:15', '16:00'),
+-- Uvod u programsko inženjerstvo - Vježbe (Grupa B)
+(8, 2, 3, 'Srijeda', '12:15', '14:00'),
+-- Uvod u programsko inženjerstvo - Vježbe (Grupa C)
+(8, 3, 4, 'Petak', '14:15', '16:00');
+
+-- 10. Chat poruke
+INSERT INTO chat (posiljatelj_id, posiljatelj_tip, primatelj_id, primatelj_tip, poruka, vrijeme) VALUES
+-- Student šalje pitanje profesoru
+(1, 'Student', 1, 'Profesor', 'Pozdrav, kada će biti objavljeni rezultati ispita?', '2025-01-10 08:15:00'),
+-- Profesor odgovara studentu
+(1, 'Profesor', 1, 'Student', 'Rezultati će biti objavljeni u petak.', '2025-01-10 09:00:00'),
+-- Drugi student šalje pitanje profesoru
+(2, 'Student', 2, 'Profesor', 'Je li potrebno donijeti indekse na vježbe?', '2025-01-10 09:30:00'),
+-- Profesor odgovara
+(2, 'Profesor', 2, 'Student', 'Ne, nije potrebno.', '2025-01-10 09:45:00'),
+-- Još jedna poruka između studenta i profesora
+(3, 'Student', 3, 'Profesor', 'Hoće li biti još konzultacija prije ispita?', '2025-01-12 10:45:00'),
+(3, 'Profesor', 3, 'Student', 'Da, bit će u utorak u 14:00.', '2025-01-12 11:00:00');

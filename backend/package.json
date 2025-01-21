@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --detectOpenHandles --coverage",
+    "test:watch": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --detectOpenHandles --coverage --watch",
+    "start": "nodemon src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "glob": "^11.0.0",
+    "inflight": "^1.0.6",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
+  }
+}
