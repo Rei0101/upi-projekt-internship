@@ -30,10 +30,10 @@ function RESOURCE_NOT_FOUND(res) {
   });
 }
 
-function DATABASE_ERROR(res) {
+function INTERNAL_SERVER_ERROR(res) {
   return res.status(500).json({
     success: false,
-    errorCode: "DATABASE_ERROR",
+    errorCode: "INTERNAL_SERVER_ERROR",
     message: "Greška pri dohvaćanju podataka.",
   });
 }
@@ -42,6 +42,6 @@ export {
   INVALID_TABLE_NAME,
   INVALID_EMAIL,
   RESOURCE_NOT_FOUND,
-  DATABASE_ERROR,
+  INTERNAL_SERVER_ERROR,
   NOT_AUTHORIZED,
 };

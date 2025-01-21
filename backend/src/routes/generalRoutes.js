@@ -12,7 +12,7 @@ const validateTablica = (req, res, next) => {
   const { tablica } = req.params;
 
   if (!dozvoljeneTablice.includes(tablica)) {
-    return ERROR_CODE.DATABASE_ERROR(res);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
   next();
 };
