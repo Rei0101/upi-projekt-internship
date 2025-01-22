@@ -3,8 +3,7 @@ INSERT INTO profesor (ime, prezime, email, lozinka, todo_zapis) VALUES
 ('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123', ''),
 ('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456', ''),
 ('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789', ''),
-('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321', ''),
-('Lucija', 'Lovrić', 'lucija.lovric@univ.com', 'lozinka654', '');
+('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321', '');
 
 -- 2. Studiji
 INSERT INTO studij (naziv) VALUES
@@ -79,7 +78,7 @@ INSERT INTO prostorija (naziv, kapacitet) VALUES
 INSERT INTO student_kolegij_grupa (student_id, kolegij_id, grupa_id, tip_kolegija) VALUES
 -- Ivan Ivić
 (1, 1, 1, 'Predavanje'),  -- Osnove programiranja - Predavanja, Grupa A
-(1, 2, 2, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa B
+(1, 2, 1, 'Vježba'),      -- Osnove programiranja - Vježbe, Grupa A
 (1, 5, 1, 'Predavanje'),  -- Linearna algebra - Predavanja, Grupa A
 (1, 6, 2, 'Vježba'),      -- Linearna algebra - Vježbe, Grupa B
 (1, 7, 1, 'Predavanje'),  -- Uvod u programsko inženjerstvo - Predavanja, Grupa A
