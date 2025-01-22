@@ -37,4 +37,11 @@ describe("Button komponenta", () => {
     const buttonElement = screen.getByText("Click Me");
     expect(buttonElement).not.toHaveClass();
   });
+  
+  test("render-a se s ispravnim tipom", () => {
+    render(<Button type="submit" text="Submit" />);
+    const buttonElement = screen.getByText("Submit");
+    expect(buttonElement).toHaveAttribute("type", "submit");
+  });
+
 });
