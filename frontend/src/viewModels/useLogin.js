@@ -1,11 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUserEmail, setTermini } from "../redux/userSlice"; 
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const dispatch=useDispatch();
+  const navigate=useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -24,10 +28,15 @@ export default function Login() {
       
       if (data.success) {
         // Uspješna prijava
-        window.location.href = "/raspored";
-        console.log("uspjeh")
-      } else {
+        dispatch(setUserEmail(email))
+        const terminiResponse = await axios.post("http://localhost:3000/api/korisnik/raspored", { email });
+        const termini = terminiResponse.data;
+
+        // Sprema termine u Redux store
+        dispatch(setTermini(termini));
+        navigate("/raspored");
         
+      } else {
         setError(data.message || "Došlo je do pogreške prilikom prijave!"); 
       }
     } catch (error) {
