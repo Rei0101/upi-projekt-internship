@@ -1,47 +1,38 @@
-function INVALID_TABLE_NAME(res) {
+function BAD_REQUEST(res, mes = "Unešeni podaci su neispravni.") {
   return res.status(400).json({
     success: false,
     errorCode: "INVALID_TABLE_NAME",
-    message: "Zadana tablica nije dozvoljena.",
+    message: mes,
   });
 }
 
-function INVALID_EMAIL(res) {
-  return res.status(400).json({
-    success: false,
-    errorCode: "INVALID_EMAIL",
-    message: "E-mail nije poslan.",
-  });
-}
-
-function NOT_AUTHORIZED(res) {
+function NOT_AUTHORIZED(res, mes = "Nije autoriziran pristup ovom resursu.") {
   return res.status(401).json({
     success: false,
     errorCode: "NOT_AUTHORIZED",
-    message: "Dogodila se greška pri provjeri valjanosti.",
+    message: mes,
   });
 }
 
-function RESOURCE_NOT_FOUND(res) {
+function NOT_FOUND(res, mes = "Nisu pronađeni traženi resursi.") {
   return res.status(404).json({
     success: false,
     errorCode: "RESOURCE_NOT_FOUND",
-    message: "U tablici nisu pronađeni traženi podaci.",
+    message: mes,
   });
 }
 
-function INTERNAL_SERVER_ERROR(res) {
+function INTERNAL_SERVER_ERROR(res, mes = "Greška pri dohvaćanju podataka.") {
   return res.status(500).json({
     success: false,
     errorCode: "INTERNAL_SERVER_ERROR",
-    message: "Greška pri dohvaćanju podataka.",
+    message: mes,
   });
 }
 
 export {
-  INVALID_TABLE_NAME,
-  INVALID_EMAIL,
-  RESOURCE_NOT_FOUND,
+  BAD_REQUEST,
+  NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   NOT_AUTHORIZED,
 };

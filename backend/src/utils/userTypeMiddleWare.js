@@ -5,7 +5,7 @@ export default async function determineUserType(req, res, next) {
   const { email } = req.body;
 
   if (!email) {
-    return ERROR_CODE.INVALID_EMAIL(res);
+    return ERROR_CODE.INVALID_EMAIL(res, "Nije unesen e-mail.");
   }
 
   try {
@@ -22,7 +22,7 @@ export default async function determineUserType(req, res, next) {
     const userType = userTypeQuery[0]?.user_type;
 
     if (!userType) {
-      return ERROR_CODE.RESOURCE_NOT_FOUND(res);
+      return ERROR_CODE.NOT_FOUND(res, "Ne postoji osoba s danim e-mail-om.");
     }
 
     req.userType = userType;

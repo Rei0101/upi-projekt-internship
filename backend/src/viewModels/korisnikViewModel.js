@@ -127,7 +127,7 @@ const getAllGroups = async (req, res) => {
       }
 
       if (kolegijiQuery.length === 0) {
-        return ERROR_CODE.RESOURCE_NOT_FOUND(res);
+        return ERROR_CODE.NOT_FOUND(res, "Nisu nađeni kolegiji sa zadanim parametrima.");
       }
 
       kolegij_idNiz = Array.from(
@@ -245,10 +245,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (studentResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Student ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om postoji.");
     }
     const student_id = studentResult[0].id;
 
@@ -309,11 +306,8 @@ const changeGroup = async (req, res) => {
       message: "Grupa uspješno promijenjena.",
     });
   } catch (error) {
-    console.error("Greška pri izmjeni grupe:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Došlo je do greške pri izmjeni grupe.",
-    });
+    console.error("Greška pri izmjeni grupe:", error.stack);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
@@ -332,10 +326,7 @@ const sendExchangeRequest = async (req, res) => {
       [posiljatelj_email]
     );
     if (senderResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Pošiljatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Pošiljatelj s danim e-mail-om ne postoji.");
     }
     const posiljatelj_id = senderResult[0].id;
 
@@ -344,10 +335,7 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Primatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
     }
     const primatelj_id = recipientResult[0].id;
 
@@ -356,10 +344,7 @@ const sendExchangeRequest = async (req, res) => {
       [posiljatelj_id]
     );
     if (existingRequestsSender.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Pošiljatelj već ima zahtjev za razmjenu na čekanju.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Pošiljatelj već ima zahtjev za razmjenu na čekanju.");
     }
 
     const existingRequestsRecipient = await queryDatabase(
@@ -367,10 +352,7 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_id]
     );
     if (existingRequestsRecipient.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Primatelj već ima zahtjev za razmjenu na čekanju.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Primatelj već ima zahtjev za razmjenu na čekanju.");
     }
 
     const newGroupResult = await queryDatabase(
@@ -381,10 +363,7 @@ const sendExchangeRequest = async (req, res) => {
     );
 
     if (newGroupResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nova grupa ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.")
     }
 
     const insertResult = await queryDatabase(
@@ -400,10 +379,7 @@ const sendExchangeRequest = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Došlo je do pogreške prilikom slanja zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
@@ -417,10 +393,7 @@ const getExchangeRequests = async (req, res) => {
     );
 
     if (studentResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Student ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om ne postoji.")
     }
 
     const student_id = studentResult[0].id;
@@ -457,10 +430,7 @@ const getExchangeRequests = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju zahtjeva za razmjenu:", error.stack);
-    return res.status(500).json({
-      success: false,
-      message: "Došlo je do greške pri dohvaćanju zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res)
   }
 };
 
@@ -473,10 +443,7 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Primatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
     }
     const primatelj_id = recipientResult[0].id;
 
@@ -485,10 +452,7 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_id]
     );
     if (exchangeRequestResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.")
     }
     const zahtjev = exchangeRequestResult[0];
 
@@ -523,18 +487,11 @@ const handleExchangeResponse = async (req, res) => {
         message: "Zahtjev za razmjenu je odbijen.",
       });
     } else {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.");
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Došlo je do pogreške prilikom obrade zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
