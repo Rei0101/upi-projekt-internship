@@ -181,7 +181,13 @@ INSERT INTO termin (kolegij_id, grupa_id, prostorija_id, dan_u_tjednu, pocetak, 
 -- Uvod u programsko inženjerstvo - Vježbe (Grupa C)
 (8, 3, 4, 'Petak', '14:15', '16:00');
 
--- 10. Chat poruke
+-- 10. Kolokviji
+INSERT INTO kolokvij (kolegij_id, grupa_id, datum, dan_u_tjednu, pocetak, kraj, prostorija_id) VALUES
+(1, 1, '2025-03-14', TO_CHAR('2025-03-14'::DATE, 'FMDay'), '18:15', '20:00', 1),
+(2, 1, '2025-03-13', TO_CHAR('2025-03-13'::DATE, 'FMDay'), '18:15', '20:00', 2),
+(3, 1, '2025-03-13', TO_CHAR('2025-03-13'::DATE, 'FMDay'), '16:15', '18:00', 3);
+
+-- 11. Chat poruke
 INSERT INTO chat (posiljatelj_id, posiljatelj_tip, primatelj_id, primatelj_tip, poruka, vrijeme) VALUES
 -- Student šalje pitanje profesoru
 (1, 'Student', 1, 'Profesor', 'Pozdrav, kada će biti objavljeni rezultati ispita?', '2025-01-10 08:15:00'),
