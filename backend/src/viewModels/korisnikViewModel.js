@@ -201,7 +201,7 @@ const getToDo = async (req, res) => {
 
     res.json({
       success: true,
-      grupe: toDoQuery,
+      note: toDoQuery,
     });
   } catch (error) {
     console.error("Greška pri ažuriranju TODO odjeljka:", error.stack);
