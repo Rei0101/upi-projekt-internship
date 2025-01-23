@@ -42,7 +42,7 @@ const getTablicaById = async (req, res) => {
     ]);
 
     if (data.length === 0) {
-      return ERROR_CODE.RESOURCE_NOT_FOUND(res);
+      return ERROR_CODE.NOT_FOUND(res);
     }
 
     res.json({

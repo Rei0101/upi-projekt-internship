@@ -7,7 +7,9 @@ const loginUser = async (req, res) => {
 
   try {
     const result = await queryDatabase(
-      `SELECT * FROM ${userType === `student` ? `student` : `profesor`} WHERE email = $1 AND lozinka = $2`,
+      `SELECT * FROM ${
+        userType === `student` ? `student` : `profesor`
+      } WHERE email = $1 AND lozinka = $2`,
       [email, password]
     );
 
@@ -26,9 +28,9 @@ const loginUser = async (req, res) => {
 };
 
 const getTimetable = async (req, res) => {
-  const {email, userType} = req;
+  const { email, userType } = req;
 
-  try{
+  try {
     //!!!!!!!! COUNT popunjenost_kapacitet NE RADI SA STUDENTOM
     //TODO POPRAVIT
     const terminiQuery = await queryDatabase(
@@ -58,9 +60,7 @@ const getTimetable = async (req, res) => {
             userType === "profesor" ? `LEFT ` : ``
           }JOIN student_kolegij_grupa skg 
             ON kgp.kolegij_id = skg.kolegij_id AND kgp.grupa_id = skg.grupa_id
-          ${
-            userType === "profesor" ? `LEFT ` : ``
-          }JOIN student s 
+          ${userType === "profesor" ? `LEFT ` : ``}JOIN student s 
             ON skg.student_id = s.id
         WHERE ${userType === "student" ? `s` : `pr`}.email = $1
         GROUP BY 
@@ -100,7 +100,7 @@ const getAllGroups = async (req, res) => {
     if (id) {
       kolegij_idNiz = [+id];
     } else {
-      if(userType == "student") {
+      if (userType == "student") {
         kolegijiQuery = await queryDatabase(
           `SELECT 
             k.id
@@ -112,8 +112,7 @@ const getAllGroups = async (req, res) => {
           WHERE s.email = $1`,
           [email]
         );
-      }
-      else if(userType == "profesor") {
+      } else if (userType == "profesor") {
         kolegijiQuery = await queryDatabase(
           `SELECT 
             k.id
@@ -126,12 +125,14 @@ const getAllGroups = async (req, res) => {
           [email]
         );
       }
-    
+
       if (kolegijiQuery.length === 0) {
-        return ERROR_CODE.RESOURCE_NOT_FOUND(res);
+        return ERROR_CODE.NOT_FOUND(res, "Nisu nađeni kolegiji sa zadanim parametrima.");
       }
 
-      kolegij_idNiz = Array.from(new Set(kolegijiQuery.map((kolegij) => kolegij.id)));    
+      kolegij_idNiz = Array.from(
+        new Set(kolegijiQuery.map((kolegij) => kolegij.id))
+      );
     }
 
     const grupeQuery = await queryDatabase(
@@ -187,6 +188,27 @@ const getAllGroups = async (req, res) => {
   }
 };
 
+const getToDo = async (req, res) => {
+  const { email, userType } = req;
+
+  try {
+    const toDoQuery = await queryDatabase(
+      `SELECT todo_zapis
+      FROM ${userType === "student" ? `student` : `profesor`}
+      WHERE email = $1`,
+      [email]
+    );
+
+    res.json({
+      success: true,
+      grupe: toDoQuery,
+    });
+  } catch (error) {
+    console.error("Greška pri ažuriranju TODO odjeljka:", error.stack);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+};
+
 const updateToDo = async (req, res) => {
   const { email, userType } = req;
   const { noviZapis } = req.body;
@@ -204,14 +226,18 @@ const updateToDo = async (req, res) => {
     console.error("Greška pri ažuriranju TODO odjeljka:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
-}
-
+};
 
 const changeGroup = async (req, res) => {
   const { student_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
 
   try {
-    console.log("Podaci primljeni u zahtjevu:", { student_email, kolegij_id, stara_grupa_id, nova_grupa_id });
+    console.log("Podaci primljeni u zahtjevu:", {
+      student_email,
+      kolegij_id,
+      stara_grupa_id,
+      nova_grupa_id,
+    });
 
     const studentResult = await queryDatabase(
       "SELECT id FROM student WHERE email = $1",
@@ -219,10 +245,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (studentResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Student ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om postoji.");
     }
     const student_id = studentResult[0].id;
 
@@ -283,17 +306,19 @@ const changeGroup = async (req, res) => {
       message: "Grupa uspješno promijenjena.",
     });
   } catch (error) {
-    console.error("Greška pri izmjeni grupe:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Došlo je do greške pri izmjeni grupe.",
-    });
+    console.error("Greška pri izmjeni grupe:", error.stack);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
-
 const sendExchangeRequest = async (req, res) => {
-  const { posiljatelj_email, primatelj_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
+  const {
+    posiljatelj_email,
+    primatelj_email,
+    kolegij_id,
+    stara_grupa_id,
+    nova_grupa_id,
+  } = req.body;
 
   try {
     const senderResult = await queryDatabase(
@@ -301,10 +326,7 @@ const sendExchangeRequest = async (req, res) => {
       [posiljatelj_email]
     );
     if (senderResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Pošiljatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Pošiljatelj s danim e-mail-om ne postoji.");
     }
     const posiljatelj_id = senderResult[0].id;
 
@@ -313,23 +335,16 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Primatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
     }
     const primatelj_id = recipientResult[0].id;
-
 
     const existingRequestsSender = await queryDatabase(
       "SELECT * FROM zahtjev_za_razmjenu WHERE posiljatelj_id = $1 AND status = 'Na čekanju'",
       [posiljatelj_id]
     );
     if (existingRequestsSender.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Pošiljatelj već ima zahtjev za razmjenu na čekanju.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Pošiljatelj već ima zahtjev za razmjenu na čekanju.");
     }
 
     const existingRequestsRecipient = await queryDatabase(
@@ -337,12 +352,8 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_id]
     );
     if (existingRequestsRecipient.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Primatelj već ima zahtjev za razmjenu na čekanju.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Primatelj već ima zahtjev za razmjenu na čekanju.");
     }
-
 
     const newGroupResult = await queryDatabase(
       `SELECT 1 
@@ -352,10 +363,7 @@ const sendExchangeRequest = async (req, res) => {
     );
 
     if (newGroupResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nova grupa ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.")
     }
 
     const insertResult = await queryDatabase(
@@ -371,14 +379,9 @@ const sendExchangeRequest = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Došlo je do pogreške prilikom slanja zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
-
-
 
 const getExchangeRequests = async (req, res) => {
   const { student_email } = req.body;
@@ -390,10 +393,7 @@ const getExchangeRequests = async (req, res) => {
     );
 
     if (studentResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Student ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om ne postoji.")
     }
 
     const student_id = studentResult[0].id;
@@ -430,13 +430,9 @@ const getExchangeRequests = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju zahtjeva za razmjenu:", error.stack);
-    return res.status(500).json({
-      success: false,
-      message: "Došlo je do greške pri dohvaćanju zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res)
   }
 };
-
 
 const handleExchangeResponse = async (req, res) => {
   const { primatelj_email, odluka } = req.body;
@@ -447,10 +443,7 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Primatelj ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
     }
     const primatelj_id = recipientResult[0].id;
 
@@ -459,10 +452,7 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_id]
     );
     if (exchangeRequestResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.")
     }
     const zahtjev = exchangeRequestResult[0];
 
@@ -497,24 +487,22 @@ const handleExchangeResponse = async (req, res) => {
         message: "Zahtjev za razmjenu je odbijen.",
       });
     } else {
-      return res.status(400).json({
-        success: false,
-        message: "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.");
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Došlo je do pogreške prilikom obrade zahtjeva za razmjenu.",
-    });
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
-
-
-
-
-
-
-export { loginUser, getTimetable, getAllGroups, updateToDo, changeGroup, sendExchangeRequest, getExchangeRequests, handleExchangeResponse };
+export {
+  loginUser,
+  getTimetable,
+  getAllGroups,
+  getToDo,
+  updateToDo,
+  changeGroup,
+  sendExchangeRequest,
+  getExchangeRequests,
+  handleExchangeResponse,
+};
