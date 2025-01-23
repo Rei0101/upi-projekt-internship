@@ -89,6 +89,19 @@ CREATE TABLE chat (
     vrijeme TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 11. Tablica za zahtjeve kod razmjene grupa
+CREATE TABLE zahtjev_za_razmjenu (
+    id SERIAL PRIMARY KEY,
+    posiljatelj_id INT NOT NULL REFERENCES student(id),
+    primatelj_id INT NOT NULL REFERENCES student(id),
+    kolegij_id INT NOT NULL REFERENCES kolegij(id),
+    stara_grupa_id INT NOT NULL REFERENCES grupa(id),  
+    nova_grupa_id INT NOT NULL REFERENCES grupa(id),   
+    status VARCHAR(50) DEFAULT 'Na čekanju',
+    datum_zahteva TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- Dodavanje ograničenja za referencijalni integritet i indekse
 CREATE INDEX idx_termin_kolegij ON termin(kolegij_id);
 CREATE INDEX idx_chat_posiljatelj ON chat(posiljatelj_id);
