@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "../css/raspored.css";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { setNotes } from "../redux/userSlice";
 
 function Raspored() {
   const days = [
@@ -12,11 +14,39 @@ function Raspored() {
     "Subota",
     "Nedjelja",
   ];
-  const [text, setText] = useState("");
-  const [showAll, setShowAll] = useState(false); // Stanje za checkbox
+
+  
   const termini = useSelector((state) => state.user.termini.termini);
   const svitermini = useSelector((state) => state.user.svitermini.grupe);
+  const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
+  const email = useSelector((state) => state.user.email);
 
+  
+  
+  const [text, setText] = useState(notes || "");
+
+  const [showAll, setShowAll] = useState(false);
+  const dispatch = useDispatch();
+
+  
+  const handleSave = async () => {
+    try {
+      await axios.put("http://localhost:3000/api/korisnik/novi-todo", {
+        email: email,
+        noviZapis: text,
+      });
+      console.log("Zabilješka uspješno spremljena!");
+
+      
+      
+
+    } catch (error) {
+      console.error("Greška prilikom slanja zahtjeva:", error);
+    }
+    console.log(notes)
+  };
+
+  
   const mapTerminiToGrid = (terminiData) => {
     if (!Array.isArray(terminiData) || terminiData.length === 0) {
       console.warn("Nema termina za prikaz.");
@@ -24,10 +54,8 @@ function Raspored() {
     }
 
     const grid = [];
-
     for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
-      grid[dayIndex] = Array(5).fill(null); // Pretpostavka: 5 vremenskih slotova od 08:00 do 12:00
-
+      grid[dayIndex] = Array(5).fill(null);
       for (const termin of terminiData) {
         if (termin.dan_u_tjednu.trim() === days[dayIndex].trim()) {
           const startHour = parseInt(termin.pocetak.split(":")[0], 10);
@@ -46,16 +74,16 @@ function Raspored() {
         }
       }
     }
-
-    console.log("Generated grid:", grid); // Debugging grid
     return grid;
   };
 
-  const gridData = mapTerminiToGrid(showAll ? svitermini : termini); // Ovisno o stanju checkboxa
+  
+  const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
 
   return (
     <>
       <div className="main-container">
+        {/* Lijevi dio: Raspored */}
         <div className="schedule-container">
           <div className="schedule-grid">
             {days.map((day) => (
@@ -69,17 +97,15 @@ function Raspored() {
                   event !== null ? (
                     <div
                       key={`${dayIndex}-${eventIndex}`}
-                      className={`grid-cell ${event.type === "predavanje" ? "yellow" : "red"
-                        }`}
+                      className={`grid-cell ${
+                        event.type === "predavanje" ? "yellow" : "red"
+                      }`}
                     >
                       {event.kolegij_naziv}
                     </div>
                   ) : (
-                    <div
-                      key={`${dayIndex}-${eventIndex}`}
-                      className="grid-cell"
-                    >
-                      {/* Empty cell if no event is scheduled */}
+                    <div key={`${dayIndex}-${eventIndex}`} className="grid-cell">
+                      {/* Prazan slot */}
                     </div>
                   )
                 )}
@@ -87,20 +113,23 @@ function Raspored() {
             ))}
           </div>
         </div>
+
+        {/* Desni dio: Textarea za bilješke */}
         <div className="side-container">
           <div className="text-area">
             <h2>Zabilješke</h2>
             <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={text} 
+              onChange={(e) => setText(e.target.value)} 
               placeholder="Unesite tekst ovdje..."
               rows="10"
             />
-            <button>Spremi</button>
+            <button onClick={handleSave}>Spremi</button>
           </div>
         </div>
-
       </div>
+
+      {/* Checkbox za prikaz svih termina ili samo nekih */}
       <div className="checkbox-container">
         <label className="checkbox-label">
           <input
@@ -112,9 +141,7 @@ function Raspored() {
           Prikaži sve termine
         </label>
       </div>
-
     </>
-
   );
 }
 
