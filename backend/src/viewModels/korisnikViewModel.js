@@ -187,27 +187,6 @@ const getAllGroups = async (req, res) => {
   }
 };
 
-const getToDo = async (req, res) => {
-  const { email, userType } = req;
-
-  try {
-    const toDoQuery = await queryDatabase(
-      `SELECT todo_zapis
-      FROM ${userType === "student" ? `student` : `profesor`}
-      WHERE email = $1`,
-      [email]
-    );
-
-    res.json({
-      success: true,
-      grupe: toDoQuery,
-    });
-  } catch (error) {
-    console.error("Greška pri ažuriranju TODO odjeljka:", error.stack);
-    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
-  }
-}
-
 const updateToDo = async (req, res) => {
   const { email, userType } = req;
   const { noviZapis } = req.body;
@@ -227,4 +206,315 @@ const updateToDo = async (req, res) => {
   }
 }
 
-export { loginUser, getTimetable, getAllGroups, getToDo, updateToDo };
+
+const changeGroup = async (req, res) => {
+  const { student_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
+
+  try {
+    console.log("Podaci primljeni u zahtjevu:", { student_email, kolegij_id, stara_grupa_id, nova_grupa_id });
+
+    const studentResult = await queryDatabase(
+      "SELECT id FROM student WHERE email = $1",
+      [student_email]
+    );
+
+    if (studentResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Student ne postoji.",
+      });
+    }
+    const student_id = studentResult[0].id;
+
+    const kolegijResult = await queryDatabase(
+      "SELECT id FROM kolegij WHERE id = $1",
+      [kolegij_id]
+    );
+
+    if (kolegijResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Kolegij ne postoji.",
+      });
+    }
+
+    const newGroupResult = await queryDatabase(
+      `SELECT 1 
+       FROM grupa 
+       WHERE id = $1;`,
+      [nova_grupa_id]
+    );
+
+    if (newGroupResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Nova grupa ne postoji.",
+      });
+    }
+
+    const studentGroupResult = await queryDatabase(
+      "SELECT * FROM student_kolegij_grupa WHERE student_id = $1 AND kolegij_id = $2 AND grupa_id = $3",
+      [student_id, kolegij_id, nova_grupa_id]
+    );
+    console.log("Rezultat upita za studenta u grupi:", studentGroupResult);
+
+    if (studentGroupResult.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Student je već član ove grupe.",
+      });
+    }
+
+    const updateResult = await queryDatabase(
+      "UPDATE student_kolegij_grupa SET grupa_id = $1 WHERE student_id = $2 AND kolegij_id = $3 AND grupa_id = $4",
+      [nova_grupa_id, student_id, kolegij_id, stara_grupa_id]
+    );
+    console.log("Rezultat ažuriranja grupe:", updateResult);
+
+    if (updateResult.rowCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Promjena grupe nije uspjela. Provjerite unesene podatke.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Grupa uspješno promijenjena.",
+    });
+  } catch (error) {
+    console.error("Greška pri izmjeni grupe:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Došlo je do greške pri izmjeni grupe.",
+    });
+  }
+};
+
+
+const sendExchangeRequest = async (req, res) => {
+  const { posiljatelj_email, primatelj_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
+
+  try {
+    const senderResult = await queryDatabase(
+      "SELECT id FROM student WHERE email = $1",
+      [posiljatelj_email]
+    );
+    if (senderResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Pošiljatelj ne postoji.",
+      });
+    }
+    const posiljatelj_id = senderResult[0].id;
+
+    const recipientResult = await queryDatabase(
+      "SELECT id FROM student WHERE email = $1",
+      [primatelj_email]
+    );
+    if (recipientResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Primatelj ne postoji.",
+      });
+    }
+    const primatelj_id = recipientResult[0].id;
+
+
+    const existingRequestsSender = await queryDatabase(
+      "SELECT * FROM zahtjev_za_razmjenu WHERE posiljatelj_id = $1 AND status = 'Na čekanju'",
+      [posiljatelj_id]
+    );
+    if (existingRequestsSender.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Pošiljatelj već ima zahtjev za razmjenu na čekanju.",
+      });
+    }
+
+    const existingRequestsRecipient = await queryDatabase(
+      "SELECT * FROM zahtjev_za_razmjenu WHERE primatelj_id = $1 AND status = 'Na čekanju'",
+      [primatelj_id]
+    );
+    if (existingRequestsRecipient.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Primatelj već ima zahtjev za razmjenu na čekanju.",
+      });
+    }
+
+
+    const newGroupResult = await queryDatabase(
+      `SELECT 1 
+       FROM grupa 
+       WHERE id = $1;`,
+      [nova_grupa_id]
+    );
+
+    if (newGroupResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Nova grupa ne postoji.",
+      });
+    }
+
+    const insertResult = await queryDatabase(
+      `INSERT INTO zahtjev_za_razmjenu (posiljatelj_id, primatelj_id, kolegij_id, stara_grupa_id, nova_grupa_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [posiljatelj_id, primatelj_id, kolegij_id, stara_grupa_id, nova_grupa_id]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Zahtjev za razmjenu je uspješno poslan.",
+      requestId: insertResult[0].id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Došlo je do pogreške prilikom slanja zahtjeva za razmjenu.",
+    });
+  }
+};
+
+
+
+const getExchangeRequests = async (req, res) => {
+  const { student_email } = req.body;
+
+  try {
+    const studentResult = await queryDatabase(
+      "SELECT id FROM student WHERE email = $1",
+      [student_email]
+    );
+
+    if (studentResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Student ne postoji.",
+      });
+    }
+
+    const student_id = studentResult[0].id;
+
+    const exchangeRequests = await queryDatabase(
+      `
+      SELECT 
+        z.id AS zahtjev_id,
+        posiljatelj.ime || ' ' || posiljatelj.prezime AS posiljatelj_ime,
+        k.naziv AS kolegij,
+        sg.naziv AS stara_grupa,
+        ng.naziv AS nova_grupa
+      FROM zahtjev_za_razmjenu z
+      JOIN student posiljatelj ON z.posiljatelj_id = posiljatelj.id
+      JOIN kolegij k ON z.kolegij_id = k.id
+      JOIN grupa sg ON z.stara_grupa_id = sg.id
+      JOIN grupa ng ON z.nova_grupa_id = ng.id
+      WHERE z.posiljatelj_id = $1 OR z.primatelj_id = $1
+      `,
+      [student_id]
+    );
+
+    if (exchangeRequests.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Nema zahtjeva za razmjenu.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Zahtjevi za razmjenu uspješno dohvaćeni.",
+      data: exchangeRequests,
+    });
+  } catch (error) {
+    console.error("Greška pri dohvaćanju zahtjeva za razmjenu:", error.stack);
+    return res.status(500).json({
+      success: false,
+      message: "Došlo je do greške pri dohvaćanju zahtjeva za razmjenu.",
+    });
+  }
+};
+
+
+const handleExchangeResponse = async (req, res) => {
+  const { primatelj_email, odluka } = req.body;
+
+  try {
+    const recipientResult = await queryDatabase(
+      "SELECT id FROM student WHERE email = $1",
+      [primatelj_email]
+    );
+    if (recipientResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Primatelj ne postoji.",
+      });
+    }
+    const primatelj_id = recipientResult[0].id;
+
+    const exchangeRequestResult = await queryDatabase(
+      "SELECT * FROM zahtjev_za_razmjenu WHERE primatelj_id = $1 AND status = 'Na čekanju'",
+      [primatelj_id]
+    );
+    if (exchangeRequestResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.",
+      });
+    }
+    const zahtjev = exchangeRequestResult[0];
+
+    if (odluka === "Accepted") {
+      await queryDatabase(
+        "UPDATE student_kolegij_grupa SET grupa_id = $1 WHERE student_id = $2 AND kolegij_id = $3",
+        [zahtjev.nova_grupa_id, zahtjev.posiljatelj_id, zahtjev.kolegij_id]
+      );
+
+      await queryDatabase(
+        "UPDATE student_kolegij_grupa SET grupa_id = $1 WHERE student_id = $2 AND kolegij_id = $3",
+        [zahtjev.stara_grupa_id, zahtjev.primatelj_id, zahtjev.kolegij_id]
+      );
+
+      await queryDatabase(
+        "UPDATE zahtjev_za_razmjenu SET status = 'Odobren' WHERE id = $1",
+        [zahtjev.id]
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Zahtjev za razmjenu je odobren i grupe su zamijenjene.",
+      });
+    } else if (odluka === "Declined") {
+      await queryDatabase(
+        "UPDATE zahtjev_za_razmjenu SET status = 'Odbijen' WHERE id = $1",
+        [zahtjev.id]
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Zahtjev za razmjenu je odbijen.",
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Došlo je do pogreške prilikom obrade zahtjeva za razmjenu.",
+    });
+  }
+};
+
+
+
+
+
+
+
+export { loginUser, getTimetable, getAllGroups, updateToDo, changeGroup, sendExchangeRequest, getExchangeRequests, handleExchangeResponse };
