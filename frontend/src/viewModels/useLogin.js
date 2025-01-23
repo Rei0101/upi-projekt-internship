@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUserEmail, setTermini } from "../redux/userSlice"; 
+import { setUserEmail, setTermini,setSviTermini,setNotes} from "../redux/userSlice"; 
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -31,9 +31,13 @@ export default function Login() {
         dispatch(setUserEmail(email))
         const terminiResponse = await axios.post("http://localhost:3000/api/korisnik/raspored", { email });
         const termini = terminiResponse.data;
+        const sviterminiResponse=await axios.post("http://localhost:3000/api/korisnik/sve-grupe",{email});
+        console.log(sviterminiResponse)
+        const svitermini=sviterminiResponse.data
 
         // Sprema termine u Redux store
         dispatch(setTermini(termini));
+        dispatch(setSviTermini(svitermini));
         navigate("/raspored");
         
       } else {
