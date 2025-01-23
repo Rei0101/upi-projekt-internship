@@ -1,6 +1,6 @@
 .main-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Razmak između glavnog rasporeda i bočne strane */
     align-items: flex-start;
     gap: 20px;
     padding: 20px;
@@ -37,85 +37,65 @@
     font-size: 14px;
 }
 
+.grid-cell.yellow {
+    background-color: yellow;
+}
+
+.grid-cell.red {
+    background-color: red;
+}
+
 .side-container {
+    margin-left: 2%;
     display: flex;
     flex-direction: column;
-    flex: 1;
+    align-items: flex-end; /* Poravnanje uz desni rub */
     gap: 20px;
 }
 
-.upcoming-events,
-.todo-list {
+.text-area {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    
-}
-
-.upcoming-events h2,
-.todo-list h2 {
-    margin-bottom: 15px;
-}
-
-.upcoming-events ul,
-.todo-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.upcoming-events li,
-.todo-list li {
     width: 100%;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    word-wrap: break-word;
-    resize: none;
-    box-sizing: border-box;
-    white-space: normal;
+    max-width: 400px; /* Širina spremnika */
 }
 
-.upcoming-events li:last-child,
-.todo-list li:last-child {
-    border-bottom: none;
+.text-area h2 {
+    margin-bottom: 10px;
+    font-size: 18px;
 }
 
-.task-item {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: px solid #ddd;
-    word-wrap: break-word;
-    resize: none;
-    box-sizing: border-box;
-    white-space: normal;
-}
-
-.delete-task-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
+.text-area textarea {
+    margin:2%;
+    width: 94%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 5px 10px;
+    resize: vertical; /* Omogućuje samo vertikalno prilagođavanje veličine */
+    font-size: 14px;
+    font-family: inherit;
+}
+.checkbox-container {
+    margin-top: 20px;
+    text-align: center; /* Centriranje checkboxa ispod rasporeda */
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Razmak između checkboxa i teksta */
     font-size: 16px;
+    font-weight: bold;
+    color: #333;
     cursor: pointer;
 }
 
-.delete-task-button:hover {
-    background-color: #b02a37;
+.checkbox-input {
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff; /* Stiliziranje boje checkboxa */
+    cursor: pointer;
 }
-
-.todo-list
-{
-    max-width: 400px;
-}
-
-.grid-cell.yellow {
-    background-color: yellow;
-  }
-  
-  .grid-cell.red {
-    background-color: red;
-  }
