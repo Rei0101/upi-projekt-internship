@@ -64,7 +64,14 @@ const getTimetable = async (req, res) => {
             ON skg.student_id = s.id
         WHERE ${userType === "student" ? `s` : `pr`}.email = $1
         GROUP BY 
-          t.dan_u_tjednu, t.pocetak, t.kraj, k.id, k.naziv, pr.ime, pr.prezime, g.naziv, p.naziv, p.kapacitet
+          t.dan_u_tjednu, 
+          t.pocetak, t.kraj, 
+          k.id, k.naziv, 
+          pr.ime, 
+          pr.prezime, 
+          g.naziv, 
+          p.naziv, 
+          p.kapacitet
         ORDER BY
           CASE 
             WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
@@ -127,7 +134,10 @@ const getAllGroups = async (req, res) => {
       }
 
       if (kolegijiQuery.length === 0) {
-        return ERROR_CODE.NOT_FOUND(res, "Nisu nađeni kolegiji sa zadanim parametrima.");
+        return ERROR_CODE.NOT_FOUND(
+          res,
+          "Nisu nađeni kolegiji sa zadanim parametrima."
+        );
       }
 
       kolegij_idNiz = Array.from(
@@ -164,7 +174,14 @@ const getAllGroups = async (req, res) => {
           ON skg.student_id = s.id
       WHERE k.id = ANY($1)
       GROUP BY 
-          t.dan_u_tjednu, t.pocetak, t.kraj, k.id, k.naziv, pr.ime, pr.prezime, g.naziv, p.naziv, p.kapacitet
+          t.dan_u_tjednu, 
+          t.pocetak, 
+          t.kraj, k.id, 
+          k.naziv, pr.ime, 
+          pr.prezime, 
+          g.naziv, 
+          p.naziv, 
+          p.kapacitet
       ORDER BY
       CASE 
         WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
@@ -255,10 +272,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (kolegijResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Kolegij ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Kolegij s danim id-om ne postoji.");
     }
 
     const newGroupResult = await queryDatabase(
@@ -269,10 +283,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (newGroupResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nova grupa ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.");
     }
 
     const studentGroupResult = await queryDatabase(
@@ -282,10 +293,7 @@ const changeGroup = async (req, res) => {
     console.log("Rezultat upita za studenta u grupi:", studentGroupResult);
 
     if (studentGroupResult.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Student je već član ove grupe.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Student je već član ove grupe.");
     }
 
     const updateResult = await queryDatabase(
@@ -295,10 +303,10 @@ const changeGroup = async (req, res) => {
     console.log("Rezultat ažuriranja grupe:", updateResult);
 
     if (updateResult.rowCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Promjena grupe nije uspjela. Provjerite unesene podatke.",
-      });
+      return ERROR_CODE.BAD_REQUEST(
+        res,
+        "Promjena grupe nije uspjela. Provjerite unesene podatke."
+      );
     }
 
     res.status(200).json({
@@ -326,7 +334,10 @@ const sendExchangeRequest = async (req, res) => {
       [posiljatelj_email]
     );
     if (senderResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Pošiljatelj s danim e-mail-om ne postoji.");
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Pošiljatelj s danim e-mail-om ne postoji."
+      );
     }
     const posiljatelj_id = senderResult[0].id;
 
@@ -335,7 +346,10 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Primatelj s danim e-mail-om ne postoji."
+      );
     }
     const primatelj_id = recipientResult[0].id;
 
@@ -344,7 +358,10 @@ const sendExchangeRequest = async (req, res) => {
       [posiljatelj_id]
     );
     if (existingRequestsSender.length > 0) {
-      return ERROR_CODE.BAD_REQUEST(res, "Pošiljatelj već ima zahtjev za razmjenu na čekanju.");
+      return ERROR_CODE.BAD_REQUEST(
+        res,
+        "Pošiljatelj već ima zahtjev za razmjenu na čekanju."
+      );
     }
 
     const existingRequestsRecipient = await queryDatabase(
@@ -352,7 +369,10 @@ const sendExchangeRequest = async (req, res) => {
       [primatelj_id]
     );
     if (existingRequestsRecipient.length > 0) {
-      return ERROR_CODE.BAD_REQUEST(res, "Primatelj već ima zahtjev za razmjenu na čekanju.");
+      return ERROR_CODE.BAD_REQUEST(
+        res,
+        "Primatelj već ima zahtjev za razmjenu na čekanju."
+      );
     }
 
     const newGroupResult = await queryDatabase(
@@ -363,7 +383,7 @@ const sendExchangeRequest = async (req, res) => {
     );
 
     if (newGroupResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.")
+      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.");
     }
 
     const insertResult = await queryDatabase(
@@ -393,7 +413,7 @@ const getExchangeRequests = async (req, res) => {
     );
 
     if (studentResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om ne postoji.")
+      return ERROR_CODE.NOT_FOUND(res, "Student s danim e-mail-om ne postoji.");
     }
 
     const student_id = studentResult[0].id;
@@ -430,7 +450,7 @@ const getExchangeRequests = async (req, res) => {
     });
   } catch (error) {
     console.error("Greška pri dohvaćanju zahtjeva za razmjenu:", error.stack);
-    return ERROR_CODE.INTERNAL_SERVER_ERROR(res)
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
 
@@ -443,7 +463,10 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_email]
     );
     if (recipientResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Primatelj s danim e-mail-om ne postoji.");
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Primatelj s danim e-mail-om ne postoji."
+      );
     }
     const primatelj_id = recipientResult[0].id;
 
@@ -452,7 +475,10 @@ const handleExchangeResponse = async (req, res) => {
       [primatelj_id]
     );
     if (exchangeRequestResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Nema zahtjeva za razmjenu na čekanju za ovog primatelja.")
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Nema zahtjeva za razmjenu na čekanju za ovog primatelja."
+      );
     }
     const zahtjev = exchangeRequestResult[0];
 
@@ -487,10 +513,77 @@ const handleExchangeResponse = async (req, res) => {
         message: "Zahtjev za razmjenu je odbijen.",
       });
     } else {
-      return ERROR_CODE.BAD_REQUEST(res, "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'.");
+      return ERROR_CODE.BAD_REQUEST(
+        res,
+        "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'."
+      );
     }
   } catch (error) {
     console.error(error);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+};
+
+const getColloquium = async (req, res) => {
+  const { email, userType } = req;
+
+  try {
+    const colloquiumQuery = await queryDatabase(
+      `SELECT 
+        ko.naziv AS naziv_Kolegija,
+        g.naziv AS naziv_grupe,
+        k.datum AS datum,
+        CASE 
+          WHEN k.dan_u_tjednu = 'Monday' THEN 'Ponedjeljak'
+          WHEN k.dan_u_tjednu = 'Tuesday' THEN 'Utorak'
+          WHEN k.dan_u_tjednu = 'Wednesday' THEN 'Srijeda'
+          WHEN k.dan_u_tjednu = 'Thursday' THEN 'Četvrtak'
+          WHEN k.dan_u_tjednu = 'Friday' THEN 'Petak'
+          WHEN k.dan_u_tjednu = 'Saturday' THEN 'Subota'
+          WHEN k.dan_u_tjednu = 'Sunday' THEN 'Nedjelja'
+          ELSE k.dan_u_tjednu
+        END AS dan_u_tjednu,
+        k.pocetak AS pocetak,
+        k.kraj AS kraj,
+        CONCAT(pro.ime, ' ', pro.prezime) AS profesor_ime,
+        p.naziv AS naziv_prostorije
+      FROM kolokvij k
+        JOIN kolegij ko ON
+          k.kolegij_id = ko.id
+        JOIN grupa g ON
+          k.grupa_id = g.id
+        JOIN prostorija p ON
+          k.prostorija_id = p.id
+        JOIN kolegij_grupa_profesor kgp ON
+          g.id = kgp.grupa_id AND k.id = kgp.kolegij_id
+        JOIN profesor pro ON
+          kgp.profesor_id = pro.id
+        JOIN student_kolegij_grupa skg ON
+          ko.id = skg.kolegij_id AND g.id = skg.grupa_id
+        JOIN student s ON
+          skg.student_id = s.id
+      WHERE ${userType === "student" ? `s` : `pro`}.email = $1
+      GROUP BY 
+        ko.naziv,
+        g.naziv, 
+        k.datum, 
+        k.dan_u_tjednu, 
+        k.pocetak, 
+        k.kraj, 
+        pro.ime, 
+        pro.prezime, 
+        p.naziv
+      ORDER BY
+        k.datum`,
+      [email]
+    );
+
+    res.json({
+      success: true,
+      colloquiums: colloquiumQuery,
+    });
+  } catch (error) {
+    console.error("Greška pri dohvaćanju kolokvija:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
@@ -505,4 +598,5 @@ export {
   sendExchangeRequest,
   getExchangeRequests,
   handleExchangeResponse,
+  getColloquium,
 };

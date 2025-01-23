@@ -78,7 +78,20 @@ CREATE TABLE termin (
     CONSTRAINT unique_termin UNIQUE (dan_u_tjednu, prostorija_id, pocetak, kraj)
 );
 
--- 10. Tablica za chat poruke
+-- 10. Tablica za kolokvije
+CREATE TABLE kolokvij (
+    id SERIAL PRIMARY KEY,
+    kolegij_id INT NOT NULL REFERENCES kolegij(id),
+    grupa_id INT NOT NULL REFERENCES grupa(id),
+    datum DATE NOT NULL,
+    dan_u_tjednu VARCHAR(20) NOT NULL,
+    pocetak TIME NOT NULL,
+    kraj TIME NOT NULL,
+    prostorija_id INT NOT NULL REFERENCES prostorija(id),
+    CONSTRAINT unique_kolokvij UNIQUE (kolegij_id, grupa_id, datum, pocetak)
+);
+
+-- 11. Tablica za chat poruke
 CREATE TABLE chat (
     id SERIAL PRIMARY KEY,
     posiljatelj_id INT NOT NULL,
@@ -89,7 +102,7 @@ CREATE TABLE chat (
     vrijeme TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 11. Tablica za zahtjeve kod razmjene grupa
+-- 12. Tablica za zahtjeve kod razmjene grupa
 CREATE TABLE zahtjev_za_razmjenu (
     id SERIAL PRIMARY KEY,
     posiljatelj_id INT NOT NULL REFERENCES student(id),
@@ -98,9 +111,8 @@ CREATE TABLE zahtjev_za_razmjenu (
     stara_grupa_id INT NOT NULL REFERENCES grupa(id),  
     nova_grupa_id INT NOT NULL REFERENCES grupa(id),   
     status VARCHAR(50) DEFAULT 'Na čekanju',
-    datum_zahteva TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    datum_zahtjeva TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 -- Dodavanje ograničenja za referencijalni integritet i indekse
 CREATE INDEX idx_termin_kolegij ON termin(kolegij_id);
