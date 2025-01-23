@@ -98,7 +98,7 @@ CREATE TABLE zahtjev_za_razmjenu (
     stara_grupa_id INT NOT NULL REFERENCES grupa(id),  
     nova_grupa_id INT NOT NULL REFERENCES grupa(id),   
     status VARCHAR(50) DEFAULT 'Na čekanju',
-    datum_zahteva TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    datum_zahtjeva TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 

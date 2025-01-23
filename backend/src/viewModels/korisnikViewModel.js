@@ -255,10 +255,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (kolegijResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Kolegij ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Kolegij s danim id-om ne postoji.")
     }
 
     const newGroupResult = await queryDatabase(
@@ -269,10 +266,7 @@ const changeGroup = async (req, res) => {
     );
 
     if (newGroupResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Nova grupa ne postoji.",
-      });
+      return ERROR_CODE.NOT_FOUND(res, "Nova grupa ne postoji.");
     }
 
     const studentGroupResult = await queryDatabase(
@@ -282,10 +276,7 @@ const changeGroup = async (req, res) => {
     console.log("Rezultat upita za studenta u grupi:", studentGroupResult);
 
     if (studentGroupResult.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Student je već član ove grupe.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Student je već član ove grupe.")
     }
 
     const updateResult = await queryDatabase(
@@ -295,10 +286,7 @@ const changeGroup = async (req, res) => {
     console.log("Rezultat ažuriranja grupe:", updateResult);
 
     if (updateResult.rowCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Promjena grupe nije uspjela. Provjerite unesene podatke.",
-      });
+      return ERROR_CODE.BAD_REQUEST(res, "Promjena grupe nije uspjela. Provjerite unesene podatke.")
     }
 
     res.status(200).json({
