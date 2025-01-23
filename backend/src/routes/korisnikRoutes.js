@@ -9,6 +9,7 @@ import {
   sendExchangeRequest,
   getExchangeRequests,
   handleExchangeResponse,
+  getColloquium
 } from "../viewModels/korisnikViewModel.js";
 import userTypeMiddleWare from "../utils/userTypeMiddleWare.js";
 
@@ -25,5 +26,7 @@ router.patch("/promjena-grupe", changeGroup);
 router.post("/zahtjev-razmjene", sendExchangeRequest);
 router.post("/dobavi-zahtjev", getExchangeRequests);
 router.post("/obradi-zahtjev", handleExchangeResponse);
+
+router.post("/kolokviji", userTypeMiddleWare, getColloquium)
 
 export default router;
