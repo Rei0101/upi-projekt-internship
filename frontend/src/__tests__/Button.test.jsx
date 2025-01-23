@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
-import Button from "/src/components/Button.jsx"; // Adjust the import path as needed
+import Button from "/src/components/Button.jsx";
 
 describe("Button komponenta", () => {
   test("pravilno se render-a s pravim props-ima", () => {

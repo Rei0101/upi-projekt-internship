@@ -1,48 +1,45 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, test, expect } from "vitest";
+import renderWithProvider from "./test_utils/renderWithProvider";
 import App from "../App";
 
 describe("App komponenta", () => {
-  // Testira prikaz zaglavlja
   test("prikazuje zaglavlje", () => {
-    render(<App />);
+    renderWithProvider(<App />);
     const headerElement = screen.getByRole("heading", { name: /prijava/i });
     expect(headerElement).toBeInTheDocument();
   });
 
-  // Testira prikaz polja za unos e-maila
-  test("prikazuje polje za unos e-maila", () => {
-    render(<App />);
+  test("prikazuje polje za unos e-mail-a", () => {
+    renderWithProvider(<App />);
     const emailInput = screen.getByLabelText(/e-mail/i);
     expect(emailInput).toBeInTheDocument();
   });
 
-  // Testira prikaz polja za unos lozinke
   test("prikazuje polje za unos lozinke", () => {
-    render(<App />);
+    renderWithProvider(<App />);
     const passwordInput = screen.getByLabelText(/lozinka/i);
     expect(passwordInput).toBeInTheDocument();
   });
 
-  // Testira prikaz gumba za prijavu
   test("prikazuje gumb za prijavu", () => {
-    render(<App />);
+    renderWithProvider(<App />);
     const submitButton = screen.getByRole("button", { name: /prijavi se/i });
     expect(submitButton).toBeInTheDocument();
   });
 
-  // Testira promjenu vrijednosti polja za unos e-maila
-  test("mijenja vrijednost polja za unos e-maila", async () => {
-    render(<App />);
+  test("mijenja vrijednost polja za unos e-mail-a", async () => {
+    renderWithProvider(<App />);
     const emailInput = screen.getByLabelText(/e-mail/i);
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    await userEvent.type(emailInput, 'test@example.com'); // Use userEvent
     expect(emailInput).toHaveValue('test@example.com');
   });
 
-  // Testira promjenu vrijednosti polja za unos lozinke
   test("mijenja vrijednost polja za unos lozinke", async () => {
-    render(<App />);
+    renderWithProvider(<App />);
     const passwordInput = screen.getByLabelText(/lozinka/i);
-    fireEvent.change(passwordInput, { target: { value: 'password' } });
+    await userEvent.type(passwordInput, 'password'); // Use userEvent
     expect(passwordInput).toHaveValue('password');
   });
 });
