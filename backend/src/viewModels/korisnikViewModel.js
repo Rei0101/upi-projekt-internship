@@ -581,12 +581,53 @@ const getColloquium = async (req, res) => {
         dan_u_tjednu: prevoditelj.naHrvatski(kolokvij.dan_u_tjednu),
       })),
     });
-    
+
   } catch (error) {
     console.error("Greška pri dohvaćanju kolokvija:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
+
+const newColloquium = async (req, res) => {
+  /**
+   * Očekivani podaci trebaju biti strukturirani na ovaj način:
+   * {
+   *    email,
+   *    naziv_kolegija,
+   *    naziv_grupe,
+   *    datum,          //* (ovo je zadani format input polja tipa "date")
+   *    pocetak,
+   *    kraj,
+   *    naziv_prostorije
+   * }
+   */
+
+  const { email } = req.body;
+
+  try {
+    const emailResult = await queryDatabase(
+      "SELECT id FROM profesor WHERE email = $1",
+      [email]
+    );
+    
+    if (emailResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Profesor s danim e-mail-om ne postoji."
+      );
+    }
+    
+    const idProfesora = emailResult[0].id;
+
+    return res.status(200).json({
+      success: true,
+      message: "Dodan je novi kolokvij.",
+    });
+  } catch (error) {
+    console.error(error);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+}
 
 export {
   loginUser,
@@ -599,4 +640,5 @@ export {
   getExchangeRequests,
   handleExchangeResponse,
   getColloquium,
+  newColloquium
 };
