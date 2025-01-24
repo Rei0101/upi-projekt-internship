@@ -1,5 +1,6 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
+import prevoditelj from "../utils/prijevodDana.js";
 
 const loginUser = async (req, res) => {
   const { email, userType } = req;
@@ -174,14 +175,14 @@ const getAllGroups = async (req, res) => {
           ON skg.student_id = s.id
       WHERE k.id = ANY($1)
       GROUP BY 
-          t.dan_u_tjednu, 
-          t.pocetak, 
-          t.kraj, k.id, 
-          k.naziv, pr.ime, 
-          pr.prezime, 
-          g.naziv, 
-          p.naziv, 
-          p.kapacitet
+        t.dan_u_tjednu, 
+        t.pocetak, 
+        t.kraj, k.id, 
+        k.naziv, pr.ime, 
+        pr.prezime, 
+        g.naziv, 
+        p.naziv, 
+        p.kapacitet
       ORDER BY
       CASE 
         WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
@@ -427,10 +428,14 @@ const getExchangeRequests = async (req, res) => {
         sg.naziv AS stara_grupa,
         ng.naziv AS nova_grupa
       FROM zahtjev_za_razmjenu z
-      JOIN student posiljatelj ON z.posiljatelj_id = posiljatelj.id
-      JOIN kolegij k ON z.kolegij_id = k.id
-      JOIN grupa sg ON z.stara_grupa_id = sg.id
-      JOIN grupa ng ON z.nova_grupa_id = ng.id
+        JOIN student posiljatelj ON 
+          z.posiljatelj_id = posiljatelj.id
+        JOIN kolegij k ON 
+          z.kolegij_id = k.id
+        JOIN grupa sg ON 
+          z.stara_grupa_id = sg.id
+        JOIN grupa ng ON 
+          z.nova_grupa_id = ng.id
       WHERE z.posiljatelj_id = $1 OR z.primatelj_id = $1
       `,
       [student_id]
@@ -533,16 +538,7 @@ const getColloquium = async (req, res) => {
         ko.naziv AS naziv_Kolegija,
         g.naziv AS naziv_grupe,
         k.datum AS datum,
-        CASE 
-          WHEN k.dan_u_tjednu = 'Monday' THEN 'Ponedjeljak'
-          WHEN k.dan_u_tjednu = 'Tuesday' THEN 'Utorak'
-          WHEN k.dan_u_tjednu = 'Wednesday' THEN 'Srijeda'
-          WHEN k.dan_u_tjednu = 'Thursday' THEN 'Četvrtak'
-          WHEN k.dan_u_tjednu = 'Friday' THEN 'Petak'
-          WHEN k.dan_u_tjednu = 'Saturday' THEN 'Subota'
-          WHEN k.dan_u_tjednu = 'Sunday' THEN 'Nedjelja'
-          ELSE k.dan_u_tjednu
-        END AS dan_u_tjednu,
+        k.dan_u_tjednu,
         k.pocetak AS pocetak,
         k.kraj AS kraj,
         CONCAT(pro.ime, ' ', pro.prezime) AS profesor_ime,
@@ -580,8 +576,12 @@ const getColloquium = async (req, res) => {
 
     res.json({
       success: true,
-      colloquiums: colloquiumQuery,
+      colloquiums: colloquiumQuery.map((kolokvij) => ({
+        ...kolokvij,
+        dan_u_tjednu: prevoditelj.naHrvatski(kolokvij.dan_u_tjednu),
+      })),
     });
+    
   } catch (error) {
     console.error("Greška pri dohvaćanju kolokvija:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
