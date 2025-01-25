@@ -1,6 +1,8 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
 import prevoditelj from "../utils/prijevodDana.js";
+import provjeraUnosa from "../utils/provjeraUnosa.js";
+import provjeraFormata from "../utils/provjeraFormata.js";
 
 const loginUser = async (req, res) => {
   const { email, userType } = req;
@@ -32,8 +34,6 @@ const getTimetable = async (req, res) => {
   const { email, userType } = req;
 
   try {
-    //!!!!!!!! COUNT popunjenost_kapacitet NE RADI SA STUDENTOM
-    //TODO POPRAVIT
     const terminiQuery = await queryDatabase(
       `SELECT 
           t.dan_u_tjednu,
@@ -44,7 +44,6 @@ const getTimetable = async (req, res) => {
           CONCAT(pr.ime, ' ', pr.prezime) AS profesor_ime,
           g.naziv AS grupa_naziv,
           p.naziv AS prostorija_naziv,
-          COUNT(s.id)::int AS popunjenost_kapacitet,
           p.kapacitet AS prostorija_kapacitet
         FROM termin t
           JOIN kolegij_grupa_profesor kgp 
@@ -590,19 +589,19 @@ const getColloquium = async (req, res) => {
 
 const newColloquium = async (req, res) => {
   /**
-   * Očekivani podaci trebaju biti strukturirani na ovaj način:
+   * Očekivani podaci trebaju biti strukturirani na sljedeći način:
    * {
-   *    email,
-   *    naziv_kolegija,
-   *    naziv_grupe,
-   *    datum,          //* (ovo je zadani format input polja tipa "date")
-   *    pocetak,
-   *    kraj,
-   *    naziv_prostorije
+   *    email: "marko.markovic@univ.com",
+   *    naziv_kolegija: "Uvod u programsko inženjerstvo - Predavanja",
+   *    naziv_grupe: "Grupa A",
+   *    datum: "2025-03-15", //* (ovo je zadani format input polja tipa "date")
+   *    pocetak: "08:15",
+   *    kraj: "10:00",
+   *    naziv_prostorije: "Dvorana 1"
    * }
    */
 
-  const { email } = req.body;
+  const { email, naziv_kolegija, naziv_grupe, datum, pocetak, kraj, naziv_prostorije } = req.body;
 
   try {
     const emailResult = await queryDatabase(
@@ -616,8 +615,28 @@ const newColloquium = async (req, res) => {
         "Profesor s danim e-mail-om ne postoji."
       );
     }
+
+    const [provjera_kolegija, provjera_grupe, provjera_prostorije] = await Promise.all([
+      provjeraUnosa("kolegij", naziv_kolegija),
+      provjeraUnosa("grupa", naziv_grupe),
+      provjeraUnosa("prostorija", naziv_prostorije)
+    ]);    
+
+    if (provjera_kolegija[0] || provjera_grupe[0] || provjera_prostorije[0]) {
+      return ERROR_CODE.NOT_FOUND(res);
+    }
+
+    const formatError = provjeraFormata(datum, pocetak, kraj);
+
+    if (formatError) {
+      return ERROR_CODE.BAD_REQUEST(res, formatError)
+    }
     
-    const idProfesora = emailResult[0].id;
+    await queryDatabase(
+      `INSERT INTO kolokvij (kolegij_id, grupa_id, datum, dan_u_tjednu, pocetak, kraj, prostorija_id) VALUES
+      ($1, $2, $3, TO_CHAR($3::DATE, 'FMDay'), $4, $5, $6)`,
+      [provjera_kolegija[1], provjera_grupe[1], datum, pocetak, kraj, provjera_prostorije[1]]
+    );
 
     return res.status(200).json({
       success: true,
