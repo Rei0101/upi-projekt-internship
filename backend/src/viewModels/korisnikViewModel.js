@@ -1,5 +1,8 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
+import prevoditelj from "../utils/prijevodDana.js";
+import provjeraUnosa from "../utils/provjeraUnosa.js";
+import provjeraFormata from "../utils/provjeraFormata.js";
 
 const loginUser = async (req, res) => {
   const { email, userType } = req;
@@ -31,8 +34,6 @@ const getTimetable = async (req, res) => {
   const { email, userType } = req;
 
   try {
-    //!!!!!!!! COUNT popunjenost_kapacitet NE RADI SA STUDENTOM
-    //TODO POPRAVIT
     const terminiQuery = await queryDatabase(
       `SELECT 
           t.dan_u_tjednu,
@@ -43,7 +44,6 @@ const getTimetable = async (req, res) => {
           CONCAT(pr.ime, ' ', pr.prezime) AS profesor_ime,
           g.naziv AS grupa_naziv,
           p.naziv AS prostorija_naziv,
-          COUNT(s.id)::int AS popunjenost_kapacitet,
           p.kapacitet AS prostorija_kapacitet
         FROM termin t
           JOIN kolegij_grupa_profesor kgp 
@@ -174,14 +174,14 @@ const getAllGroups = async (req, res) => {
           ON skg.student_id = s.id
       WHERE k.id = ANY($1)
       GROUP BY 
-          t.dan_u_tjednu, 
-          t.pocetak, 
-          t.kraj, k.id, 
-          k.naziv, pr.ime, 
-          pr.prezime, 
-          g.naziv, 
-          p.naziv, 
-          p.kapacitet
+        t.dan_u_tjednu, 
+        t.pocetak, 
+        t.kraj, k.id, 
+        k.naziv, pr.ime, 
+        pr.prezime, 
+        g.naziv, 
+        p.naziv, 
+        p.kapacitet
       ORDER BY
       CASE 
         WHEN t.dan_u_tjednu = 'Ponedjeljak' THEN 1
@@ -427,10 +427,14 @@ const getExchangeRequests = async (req, res) => {
         sg.naziv AS stara_grupa,
         ng.naziv AS nova_grupa
       FROM zahtjev_za_razmjenu z
-      JOIN student posiljatelj ON z.posiljatelj_id = posiljatelj.id
-      JOIN kolegij k ON z.kolegij_id = k.id
-      JOIN grupa sg ON z.stara_grupa_id = sg.id
-      JOIN grupa ng ON z.nova_grupa_id = ng.id
+        JOIN student posiljatelj ON 
+          z.posiljatelj_id = posiljatelj.id
+        JOIN kolegij k ON 
+          z.kolegij_id = k.id
+        JOIN grupa sg ON 
+          z.stara_grupa_id = sg.id
+        JOIN grupa ng ON 
+          z.nova_grupa_id = ng.id
       WHERE z.posiljatelj_id = $1 OR z.primatelj_id = $1
       `,
       [student_id]
@@ -533,16 +537,7 @@ const getColloquium = async (req, res) => {
         ko.naziv AS naziv_Kolegija,
         g.naziv AS naziv_grupe,
         k.datum AS datum,
-        CASE 
-          WHEN k.dan_u_tjednu = 'Monday' THEN 'Ponedjeljak'
-          WHEN k.dan_u_tjednu = 'Tuesday' THEN 'Utorak'
-          WHEN k.dan_u_tjednu = 'Wednesday' THEN 'Srijeda'
-          WHEN k.dan_u_tjednu = 'Thursday' THEN 'Četvrtak'
-          WHEN k.dan_u_tjednu = 'Friday' THEN 'Petak'
-          WHEN k.dan_u_tjednu = 'Saturday' THEN 'Subota'
-          WHEN k.dan_u_tjednu = 'Sunday' THEN 'Nedjelja'
-          ELSE k.dan_u_tjednu
-        END AS dan_u_tjednu,
+        k.dan_u_tjednu,
         k.pocetak AS pocetak,
         k.kraj AS kraj,
         CONCAT(pro.ime, ' ', pro.prezime) AS profesor_ime,
@@ -580,13 +575,78 @@ const getColloquium = async (req, res) => {
 
     res.json({
       success: true,
-      colloquiums: colloquiumQuery,
+      colloquiums: colloquiumQuery.map((kolokvij) => ({
+        ...kolokvij,
+        dan_u_tjednu: prevoditelj.naHrvatski(kolokvij.dan_u_tjednu),
+      })),
     });
+
   } catch (error) {
     console.error("Greška pri dohvaćanju kolokvija:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
+
+const newColloquium = async (req, res) => {
+  /**
+   * Očekivani podaci trebaju biti strukturirani na sljedeći način:
+   * {
+   *    email: "marko.markovic@univ.com",
+   *    naziv_kolegija: "Uvod u programsko inženjerstvo - Predavanja",
+   *    naziv_grupe: "Grupa A",
+   *    datum: "2025-03-15", //* (ovo je zadani format input polja tipa "date")
+   *    pocetak: "08:15",
+   *    kraj: "10:00",
+   *    naziv_prostorije: "Dvorana 1"
+   * }
+   */
+
+  const { email, naziv_kolegija, naziv_grupe, datum, pocetak, kraj, naziv_prostorije } = req.body;
+
+  try {
+    const emailResult = await queryDatabase(
+      "SELECT id FROM profesor WHERE email = $1",
+      [email]
+    );
+    
+    if (emailResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Profesor s danim e-mail-om ne postoji."
+      );
+    }
+
+    const [provjera_kolegija, provjera_grupe, provjera_prostorije] = await Promise.all([
+      provjeraUnosa("kolegij", naziv_kolegija),
+      provjeraUnosa("grupa", naziv_grupe),
+      provjeraUnosa("prostorija", naziv_prostorije)
+    ]);    
+
+    if (provjera_kolegija[0] || provjera_grupe[0] || provjera_prostorije[0]) {
+      return ERROR_CODE.NOT_FOUND(res);
+    }
+
+    const formatError = provjeraFormata(datum, pocetak, kraj);
+
+    if (formatError) {
+      return ERROR_CODE.BAD_REQUEST(res, formatError)
+    }
+    
+    await queryDatabase(
+      `INSERT INTO kolokvij (kolegij_id, grupa_id, datum, dan_u_tjednu, pocetak, kraj, prostorija_id) VALUES
+      ($1, $2, $3, TO_CHAR($3::DATE, 'FMDay'), $4, $5, $6)`,
+      [provjera_kolegija[1], provjera_grupe[1], datum, pocetak, kraj, provjera_prostorije[1]]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Dodan je novi kolokvij.",
+    });
+  } catch (error) {
+    console.error(error);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+}
 
 export {
   loginUser,
@@ -599,4 +659,5 @@ export {
   getExchangeRequests,
   handleExchangeResponse,
   getColloquium,
+  newColloquium
 };

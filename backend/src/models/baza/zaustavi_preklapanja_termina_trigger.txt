@@ -1,0 +1,24 @@
+CREATE OR REPLACE FUNCTION provjeri_preklapanja_termina()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM termin
+        WHERE termin.prostorija_id = NEW.prostorija_id
+        AND termin.dan_u_tjednu = NEW.dan_u_tjednu
+        AND (
+            (NEW.pocetak >= termin.pocetak AND NEW.pocetak < termin.kraj) OR
+            (NEW.kraj > termin.pocetak AND NEW.kraj <= termin.kraj) OR
+            (NEW.pocetak <= termin.pocetak AND NEW.kraj >= termin.kraj)
+        )
+    ) THEN
+        RAISE EXCEPTION 'Ova je učionica zauzeta u ovom terminu.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER zaustavi_preklapanja_termina
+BEFORE INSERT ON termin
+FOR EACH ROW
+EXECUTE FUNCTION provjeri_preklapanja_termina();
