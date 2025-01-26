@@ -648,6 +648,90 @@ const newColloquium = async (req, res) => {
   }
 }
 
+const changeSchedule = async (req, res) => {
+  const { profesor_email, kolegij_naziv, dan_u_tjednu, pocetak, kraj } = req.body;
+
+  try {
+    console.log("Podaci primljeni u zahtjevu:", {
+      profesor_email,
+      kolegij_naziv,
+      dan_u_tjednu,
+      pocetak,
+      kraj,
+    });
+
+    const profesorResult = await queryDatabase(
+      "SELECT id FROM profesor WHERE email = $1",
+      [profesor_email]
+    );
+
+    if (profesorResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(res, "Profesor s danim e-mail-om ne postoji.");
+    }
+    const profesor_id = profesorResult[0].id;
+
+    const kolegijResult = await queryDatabase(
+      "SELECT id FROM kolegij WHERE naziv = $1",
+      [kolegij_naziv]
+    );
+
+    if (kolegijResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(res, "Kolegij s danim nazivom ne postoji.");
+    }
+    const kolegij_id = kolegijResult[0].id;
+
+    const profesorKolegijResult = await queryDatabase(
+      "SELECT 1 FROM kolegij_grupa_profesor WHERE kolegij_id = $1 AND profesor_id = $2",
+      [kolegij_id, profesor_id]
+    );
+
+    if (profesorKolegijResult.length === 0) {
+      return ERROR_CODE.NOT_AUTHORIZED(res, "Profesor ne predaje taj kolegij.");
+    }
+
+    const conflictCheck = await queryDatabase(
+      `SELECT 1 FROM termin 
+       WHERE kolegij_id IN (SELECT kolegij_id FROM kolegij_grupa_profesor WHERE profesor_id = $1)
+       AND dan_u_tjednu = $2 
+       AND ((pocetak, kraj) OVERLAPS ($3::TIME, $4::TIME))`,
+      [profesor_id, dan_u_tjednu, pocetak, kraj]
+    );
+
+    if (conflictCheck.length > 0) {
+      return ERROR_CODE.CONFLICT(res, "Termini se preklapaju. Promjena termina nije moguća.");
+    }
+
+
+    const terminResult = await queryDatabase(
+      "SELECT id FROM termin WHERE kolegij_id = $1",
+      [kolegij_id]
+    );
+
+    if (terminResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(res, "Termin koji želite promijeniti ne postoji.");
+    }
+    const termin_id = terminResult[0].id;
+
+    const updateResult = await queryDatabase(
+      "UPDATE termin SET dan_u_tjednu = $1, pocetak = $2, kraj = $3 WHERE id = $4",
+      [dan_u_tjednu, pocetak, kraj, termin_id]
+    );
+
+    if (updateResult.rowCount === 0) {
+      return ERROR_CODE.BAD_REQUEST(res, "Promjena termina nije uspjela. Provjerite unesene podatke.");
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Termin uspješno promijenjen.",
+    });
+  } catch (error) {
+    console.error("Greška pri izmjeni termina:", error.stack);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+};
+
+
 export {
   loginUser,
   getTimetable,
@@ -659,5 +743,6 @@ export {
   getExchangeRequests,
   handleExchangeResponse,
   getColloquium,
-  newColloquium
+  newColloquium,
+  changeSchedule
 };
