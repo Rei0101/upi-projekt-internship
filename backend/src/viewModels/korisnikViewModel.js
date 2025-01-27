@@ -245,6 +245,77 @@ const updateToDo = async (req, res) => {
   }
 };
 
+const getGroupAndParticipants = async (req, res) => {
+  const { kolegij_naziv } = req.body;
+
+  console.log("Query parametri:", req.body);
+
+  console.log("Naziv kolegija:", kolegij_naziv);
+
+
+  try {
+    // Provjera postojanja kolegija po nazivu
+    const kolegijResult = await queryDatabase(
+      "SELECT id FROM kolegij WHERE naziv = $1",
+      [kolegij_naziv]
+    );
+    if (kolegijResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Kolegij s danim nazivom ne postoji."
+      );
+    }
+
+    const kolegij_id = kolegijResult[0].id;
+
+    // Dohvati grupe povezane s kolegijem
+    const grupaResult = await queryDatabase(
+      `SELECT g.id AS grupa_id, g.naziv AS grupa_naziv
+       FROM grupa g
+       JOIN kolegij_grupa_profesor kgp ON g.id = kgp.grupa_id
+       WHERE kgp.kolegij_id = $1`,
+      [kolegij_id]
+    );
+
+    if (grupaResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Nema grupa povezanih s danim kolegijem."
+      );
+    }
+
+    // Dohvati sudionike (studente) i njihove emailove za svaku grupu
+    const groupsWithParticipants = await Promise.all(
+      grupaResult.map(async (grupa) => {
+        const studentiResult = await queryDatabase(
+          `SELECT s.email
+           FROM student s
+           JOIN student_kolegij_grupa skg ON s.id = skg.student_id
+           WHERE skg.grupa_id = $1 AND skg.kolegij_id = $2`,
+          [grupa.grupa_id, kolegij_id]
+        );
+
+        return {
+          grupa_naziv: grupa.grupa_naziv,
+          sudionici: studentiResult.map((student) => student.email),
+        };
+      })
+    );
+
+    // Vraćanje rezultata
+    res.status(200).json({
+      success: true,
+      data: groupsWithParticipants,
+    });
+  } catch (error) {
+    console.error(error);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+};
+
+
+
+
 const changeGroup = async (req, res) => {
   const { student_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
 
@@ -744,5 +815,6 @@ export {
   handleExchangeResponse,
   getColloquium,
   newColloquium,
-  changeSchedule
+  changeSchedule,
+  getGroupAndParticipants
 };

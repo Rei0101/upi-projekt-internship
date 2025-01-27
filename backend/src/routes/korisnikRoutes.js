@@ -11,7 +11,8 @@ import {
   handleExchangeResponse,
   getColloquium,
   newColloquium,
-  changeSchedule
+  changeSchedule,
+  getGroupAndParticipants
 } from "../viewModels/korisnikViewModel.js";
 import userTypeMiddleWare from "../utils/userTypeMiddleWare.js";
 
@@ -24,6 +25,7 @@ router.post("/sve-grupe/:id?", userTypeMiddleWare, getAllGroups);
 router.post("/todo", userTypeMiddleWare, getToDo);
 router.put("/novi-todo", userTypeMiddleWare, updateToDo);
 
+router.post("/dobavi-sudionike", getGroupAndParticipants);
 router.patch("/promjena-grupe", changeGroup);
 router.post("/zahtjev-razmjene", sendExchangeRequest);
 router.post("/dobavi-zahtjev", getExchangeRequests);
