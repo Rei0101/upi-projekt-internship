@@ -1,8 +1,7 @@
 import { useState } from "react";
 import "../css/raspored.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { setNotes } from "../redux/userSlice";
 
 function Raspored() {
   const days = [
@@ -17,7 +16,7 @@ function Raspored() {
 
 
   const termini = useSelector((state) => state.user.termini.termini);
-  const svitermini = useSelector((state) => state.user.svitermini.grupe);
+  const sviTermini = useSelector((state) => state.user.sviTermini.grupe);
   const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
   const email = useSelector((state) => state.user.email);
   const kolokviji = useSelector((state) => state.user.kolokviji.colloquiums)
@@ -35,7 +34,6 @@ function Raspored() {
   const [text, setText] = useState(notes || "");
 
   const [showAll, setShowAll] = useState(false);
-  const dispatch = useDispatch();
 
 
   const handleSave = async () => {
@@ -87,7 +85,7 @@ function Raspored() {
   };
 
 
-  const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
+  const gridData = mapTerminiToGrid(showAll ? sviTermini : termini);
 
   return (
     <>

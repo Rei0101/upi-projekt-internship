@@ -1,8 +1,13 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import prevoditelj from "../utils/prijevodDana.js";
 import provjeraUnosa from "../utils/provjeraUnosa.js";
 import provjeraFormata from "../utils/provjeraFormata.js";
+
+dotenv.config();
 
 const loginUser = async (req, res) => {
   const { email, userType } = req;
@@ -20,9 +25,16 @@ const loginUser = async (req, res) => {
       return ERROR_CODE.NOT_AUTHORIZED(res);
     }
 
+    const token = jwt.sign(
+      { email: email, userType: userType }, 
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRATION ||"1h" } 
+    );
+
     res.json({
       success: true,
       message: "Login successful.",
+      token
     });
   } catch (error) {
     console.error("Greška pri prijavi:", error.stack);

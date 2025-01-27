@@ -1,13 +1,16 @@
 import pkg from "pg";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 const { Pool } = pkg;
 
-// za ovo ćemo zasad samo lokalnu bazu koristit
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "ScheduleIT-DB",
-  password: "internship",
-  port: 5432,
+  user: process.env.DB_USER || "postgres",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT  || 5432,
 });
 
 export const queryDatabase = async (queryText, params = []) => {

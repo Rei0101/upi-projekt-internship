@@ -6,7 +6,7 @@ const userSlice = createSlice({
     email: "",
     termini: [],
     notes: "",
-    svitermini: [],
+    sviTermini: [],
     kolokviji:[]
   },
   reducers: {
@@ -19,7 +19,7 @@ const userSlice = createSlice({
     setNotes: (state, action) => { 
       state.notes = action.payload },
     setSviTermini: (state, action) => {
-      state.svitermini = action.payload
+      state.sviTermini = action.payload
     },
     setKolokviji:(state,action)=>{
       state.kolokviji=action.payload
