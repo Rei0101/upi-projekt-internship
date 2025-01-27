@@ -2,7 +2,6 @@ import { useState } from "react";
 import "../css/raspored.css";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { setNotes } from "../redux/userSlice";
 
 function Raspored() {
   const days = [
@@ -15,50 +14,49 @@ function Raspored() {
     "Nedjelja",
   ];
 
-
   const termini = useSelector((state) => state.user.termini.termini);
   const svitermini = useSelector((state) => state.user.svitermini.grupe);
   const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
   const email = useSelector((state) => state.user.email);
-  const kolokviji = useSelector((state) => state.user.kolokviji.colloquiums)
+  const kolokviji = useSelector((state) => state.user.kolokviji.colloquiums);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedTermin, setSelectedTermin] = useState(null);
+  const [text, setText] = useState(notes || "");
+  const [showAll, setShowAll] = useState(false);
+  const dispatch = useDispatch();
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
   };
 
-  const handleClosePopup = () => {
-    setSelectedEvent(null);
+  const handleGridEventClick = (termin) => {
+    if (showAll && termin) {
+      setSelectedTermin(termin);
+    }
   };
 
-
-  const [text, setText] = useState(notes || "");
-
-  const [showAll, setShowAll] = useState(false);
-  const dispatch = useDispatch();
-
+  const handleClosePopup = () => {
+    setSelectedEvent(null);
+    setSelectedTermin(null);
+  };
 
   const handleSave = async () => {
+    if (!text.trim()) {
+      alert("Bilješka ne može biti prazna!");
+      return;
+    }
     try {
       await axios.put("http://localhost:3000/api/korisnik/novi-todo", {
         email: email,
         noviZapis: text,
       });
-      console.log("Zabilješka uspješno spremljena!");
-
-
-
-
     } catch (error) {
       console.error("Greška prilikom slanja zahtjeva:", error);
     }
-    console.log(notes)
   };
-
 
   const mapTerminiToGrid = (terminiData) => {
     if (!Array.isArray(terminiData) || terminiData.length === 0) {
-      console.warn("Nema termina za prikaz.");
       return [];
     }
 
@@ -77,8 +75,6 @@ function Raspored() {
                 ? "predavanje"
                 : "vjezbe",
             };
-          } else {
-            console.warn(`Termin izvan raspona: ${termin}`);
           }
         }
       }
@@ -86,49 +82,105 @@ function Raspored() {
     return grid;
   };
 
-
   const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
+
+  const handleChangeGroup = async () => {
+    if (!selectedTermin) {
+      console.error("Nijedan termin nije odabran.");
+      return;
+    }
+
+    const { kolegij_id, grupa_naziv } = selectedTermin;
+    const staritermin = termini.find((stari) => stari.kolegij_id == kolegij_id)
+    const stara_grupa_id = staritermin.grupa_naziv
+    const nova_grupa_id = grupa_naziv
+    
+    const student_email = email
+    console.log(student_email, kolegij_id, stara_grupa_id, nova_grupa_id)
+    try {
+      const promjena = await axios.patch("http://localhost:3000/api/korisnik/promjena-grupe", {
+        student_email,
+        kolegij_id,
+        stara_grupa_id,
+        nova_grupa_id,
+
+      });
+      console.log("Promjena grupe uspješna:", promjena.data);
+    } catch (error) {
+      console.error("Greška prilikom promjene grupe:", error);
+    }
+  };
+
 
   return (
     <>
       <div className="events">
-      <h4>Kolokviji</h4>
-      <ul className="event-list">
-        {kolokviji.map((event, index) => (
-          <li
-            key={index}
-            className="event-item"
-            onClick={() => handleEventClick(event)}
-          >
-            <span className="event-title">{event.naziv_kolegija}</span>
-            <span className="event-date">
-              {new Date(event.datum).toLocaleDateString("hr-HR")}
-            </span>
-          </li>
-        ))}
-      </ul>
+        <h4>Kolokviji</h4>
+        <ul className="event-list">
+          {kolokviji.map((event, index) => (
+            <li
+              key={index}
+              className="event-item"
+              onClick={() => handleEventClick(event)}
+            >
+              <span className="event-title">{event.naziv_kolegija}</span>
+              <span className="event-date">
+                {new Date(event.datum).toLocaleDateString("hr-HR")}
+              </span>
+            </li>
+          ))}
+        </ul>
 
-      {selectedEvent && (
-        <div className="popup-overlay" onClick={handleClosePopup}>
-          <div
-            className="popup-content"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
-            <h3>{selectedEvent.naziv_kolegija}</h3>
-            <p><strong>Grupa:</strong> {selectedEvent.naziv_grupe}</p>
-            <p><strong>Datum:</strong> {new Date(selectedEvent.datum).toLocaleDateString("hr-HR")}</p>
-            <p><strong>Dan u tjednu:</strong> {selectedEvent.dan_u_tjednu}</p>
-            <p><strong>Vrijeme:</strong> {selectedEvent.pocetak} - {selectedEvent.kraj}</p>
-            <p><strong>Profesor:</strong> {selectedEvent.profesor_ime}</p>
-            <p><strong>Prostorija:</strong> {selectedEvent.naziv_prostorije}</p>
-            <button onClick={handleClosePopup}>Zatvori</button>
+        {selectedEvent && (
+          <div className="popup-overlay" onClick={handleClosePopup}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              <h3>{selectedEvent.naziv_kolegija}</h3>
+              <p>
+                <strong>Grupa:</strong> {selectedEvent.naziv_grupe}
+              </p>
+              <p>
+                <strong>Datum:</strong>{" "}
+                {new Date(selectedEvent.datum).toLocaleDateString("hr-HR")}
+              </p>
+              <p>
+                <strong>Dan u tjednu:</strong> {selectedEvent.dan_u_tjednu}
+              </p>
+              <p>
+                <strong>Vrijeme:</strong> {selectedEvent.pocetak} -{" "}
+                {selectedEvent.kraj}
+              </p>
+              <p>
+                <strong>Profesor:</strong> {selectedEvent.profesor_ime}
+              </p>
+              <p>
+                <strong>Prostorija:</strong> {selectedEvent.naziv_prostorije}
+              </p>
+              <button onClick={handleClosePopup}>Zatvori</button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {selectedTermin && (
+          <div className="popup-overlay" onClick={handleClosePopup}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              <h3>{selectedTermin.kolegij_naziv}</h3>
+              <p>
+                <strong>Popunjenost:</strong>{" "}
+                {selectedTermin.popunjenost_kapacitet}/
+                {selectedTermin.prostorija_kapacitet}
+              </p>
+              {selectedTermin.popunjenost_kapacitet !==
+                selectedTermin.prostorija_kapacitet &&
+                selectedTermin.kolegij_naziv.includes("Vježbe") && (
+                  <button onClick={handleChangeGroup}>Promijeni grupu</button>
+                )}
+              <button onClick={handleClosePopup}>Zatvori</button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="main-container">
-        {/* Lijevi dio: Raspored */}
         <div className="schedule-container">
           <div className="schedule-grid">
             {days.map((day) => (
@@ -144,13 +196,24 @@ function Raspored() {
                       key={`${dayIndex}-${eventIndex}`}
                       className={`grid-cell ${event.type === "predavanje" ? "yellow" : "red"
                         }`}
+                      onClick={() =>
+                        handleGridEventClick(
+                          svitermini.find(
+                            (t) => t.kolegij_naziv === event.kolegij_naziv &&
+                            t.dan_u_tjednu === days[dayIndex]
+                
+                          )
+                          
+                        )
+                      }
                     >
                       {event.kolegij_naziv}
                     </div>
                   ) : (
-                    <div key={`${dayIndex}-${eventIndex}`} className="grid-cell">
-                      {/* Prazan slot */}
-                    </div>
+                    <div
+                      key={`${dayIndex}-${eventIndex}`}
+                      className="grid-cell"
+                    ></div>
                   )
                 )}
               </div>
@@ -158,7 +221,6 @@ function Raspored() {
           </div>
         </div>
 
-        {/* Desni dio: Textarea za bilješke */}
         <div className="side-container">
           <div className="text-area">
             <h2>Zabilješke</h2>
@@ -173,7 +235,6 @@ function Raspored() {
         </div>
       </div>
 
-      {/* Checkbox za prikaz svih termina ili samo nekih */}
       <div className="checkbox-container">
         <label className="checkbox-label">
           <input

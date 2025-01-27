@@ -246,7 +246,16 @@ const updateToDo = async (req, res) => {
 };
 
 const changeGroup = async (req, res) => {
-  const { student_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
+  const { student_email, kolegij_id, stara_grupa_id:promjena_stara, nova_grupa_id:promjena_nova } = req.body;
+  const stara_grupa_id =
+  promjena_stara === "Grupa A" ? 1 :
+  promjena_stara === "Grupa B" ? 2 :
+  promjena_stara === "Grupa C" ? 3 : null;
+
+const nova_grupa_id =
+  promjena_nova === "Grupa A" ? 1 :
+  promjena_nova === "Grupa B" ? 2 :
+  promjena_nova === "Grupa C" ? 3 : null;
 
   try {
     console.log("Podaci primljeni u zahtjevu:", {
