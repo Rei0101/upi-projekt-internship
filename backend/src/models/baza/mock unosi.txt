@@ -1,9 +1,9 @@
 -- 1. Profesori 
 INSERT INTO profesor (ime, prezime, email, lozinka, todo_zapis) VALUES
-('Marko', 'Marković', 'marko.markovic@univ.com', 'lozinka123', ''),
-('Ana', 'Anić', 'ana.anic@univ.com', 'lozinka456', ''),
-('Ivana', 'Horvat', 'ivana.horvat@univ.com', 'lozinka789', ''),
-('Tomislav', 'Kovač', 'tomislav.kovac@univ.com', 'lozinka321', '');
+('Marko','Marković','marko.markovic@univ.com','$2b$10$r4Mbl9zOWkJZkH5C2BJS0exz9ECo44yOIDQ0uA3tJ5cc6BFzsIUVW',''),
+('Ana','Anić','ana.anic@univ.com','$2b$10$koHpzTND0Zi1JAwl45nB5.1G0U9kKOVjm0jrPm.wZrSMwLwuc9Ku6',''),
+('Ivana','Horvat','ivana.horvat@univ.com','$2b$10$R5LFxoUleJuLhooDzpLs/uYCAWpN3StgtWatrBTR0cp1vPfunp6QO',''),
+('Tomislav','Kovač','tomislav.kovac@univ.com','$2b$10$p.p.q/ej3tbpe8pnHXx4kuaNxY9TIfgzTSzwvO03HjAo3MTTiXw8S','');
 
 -- 2. Studiji
 INSERT INTO studij (naziv) VALUES
@@ -45,26 +45,26 @@ INSERT INTO kolegij_grupa_profesor (kolegij_id, grupa_id, profesor_id) VALUES
 
 -- 6. Studenti
 INSERT INTO student (ime, prezime, email, lozinka, todo_zapis, studij_id) VALUES
-('Ivan', 'Ivić', 'ivan.ivic@univ.com', 'lozinka789', '', 1),
-('Petra', 'Petrović', 'petra.petrovic@univ.com', 'lozinka101', '', 2),
-('Luka', 'Lukić', 'luka.lukic@univ.com', 'lozinka202', '', 1),
-('Marija', 'Marić', 'marija.maric@univ.com', 'lozinka303', '', 2),
-('Ana', 'Klarić', 'ana.klaric@univ.com', 'lozinka404', '', 1),
-('Josip', 'Jurić', 'josip.juric@univ.com', 'lozinka505', '', 2),
-('Ema', 'Emić', 'ema.emic@univ.com', 'lozinka606', '', 1),
-('Karlo', 'Karić', 'karlo.karic@univ.com', 'lozinka707', '', 2),
-('Dora', 'Novak', 'dora.novak@univ.com', 'lozinka808', '', 2),
-('Nikola', 'Nikolić', 'nikola.nikolic@univ.com', 'lozinka909', '', 1),
-('Lucija', 'Klarić', 'lucija.klaric@univ.com', 'lozinka100', '', 2),
-('Filip', 'Horvat', 'filip.horvat@univ.com', 'lozinka111', '', 1),
-('Tea', 'Pavić', 'tea.pavic@univ.com', 'lozinka121', '', 1),
-('Maja', 'Vuković', 'maja.vukovic@univ.com', 'lozinka131', '', 2),
-('Andrej', 'Babić', 'andrej.babic@univ.com', 'lozinka141', '', 1),
-('Lana', 'Kovačević', 'lana.kovacevic@univ.com', 'lozinka151', '', 2),
-('Toni', 'Đurić', 'toni.djuric@univ.com', 'lozinka161', '', 2),
-('Marta', 'Knežević', 'marta.knezevic@univ.com', 'lozinka171', '', 1),
-('Mihael', 'Prlić', 'mihael.prlic@univ.com', 'lozinka181', '', 2),
-('Lea', 'Milinović', 'lea.milinovic@univ.com', 'lozinka191', '', 1);
+('Ivan','Ivić','ivan.ivic@univ.com','$2b$10$0AnOWet3GZEjF.DX260hKeTibezepjZYDB0MtM/9YwI9tYXrnfamm','',1),
+('Petra','Petrović','petra.petrovic@univ.com','$2b$10$lMeUW52csjgFFAxSupZpGOlAkXAlIzF/HQ6dXRrr6naXaL/J5spXe','',2),
+('Luka','Lukić','luka.lukic@univ.com','$2b$10$2mrYqMXgRMS3H9GhAO9lbOclwFW17SsaXnmlUpzPPQnPHj1T11r0O','',1),
+('Marija','Marić','marija.maric@univ.com','$2b$10$GGJyHFTtXwhcJ8CmKb9BZurLh.Pk92184C1bKgjxvB/SLrk6/1iEO','',2),
+('Ana','Klarić','ana.klaric@univ.com','$2b$10$HVO7emAapbzitTLiPyCnT.0A2ReFpAXOojquUsJ6F9hNtuEfHeT2a','',1),
+('Josip','Jurić','josip.juric@univ.com','$2b$10$Ry.A4oEU7IR1kP2etLhub.43.4AijA8t28vrxKUQd97Ujjh5OiN8C','',2),
+('Ema','Emić','ema.emic@univ.com','$2b$10$5K.PZRODDLyhZeSCB30e9.aqLi11o.by.lspiX/XJGRf34nNsjjEO','',1),
+('Karlo','Karić','karlo.karic@univ.com','$2b$10$VZTMyi3Shhw.zISjLvYK5u.SCd0ROqPwDEv7XuIygsX1wNYN8vw..','',2),
+('Dora','Novak','dora.novak@univ.com','$2b$10$nMn0V01M7m3BWy0II8opuO1h2mMN33dBE0IT4OpY9aZ6oXQBieaVC','',2),
+('Nikola','Nikolić','nikola.nikolic@univ.com','$2b$10$HqZ1qTH0K/RNCIM4sPuDMOzU/lKzKwKbfC3ZNS3RoTKXiglYZxiXC','',1),
+('Lucija','Klarić','lucija.klaric@univ.com','$2b$10$RumqZZSXbCxLv.CGE3ouBen6CHzMM4AWJOnXS897qFwt2TazcfS3O','',2),
+('Filip','Horvat','filip.horvat@univ.com','$2b$10$qNfC7Tj9ZqmzvFUfpbGC0.A3tBGbxgdH5rkZphk6bMJ6BlvWsPxbK','',1),
+('Tea','Pavić','tea.pavic@univ.com','$2b$10$CgSdMohw/a3gEO8Hb2brlOR.qFDlN4ZmjoWeDlT.iSTTo2jABdvl.','',1),
+('Maja','Vuković','maja.vukovic@univ.com','$2b$10$6AZTSdoGxd30SF2II9c5oOLkxjuqZPbUcMimZOTt9ROjsuiswuLjm','',2),
+('Andrej','Babić','andrej.babic@univ.com','$2b$10$6/AB54w0EyovfCeYnV5utOHpo7WpZPj3PO4q.USqY.RAbsKABppOy','',1),
+('Lana','Kovačević','lana.kovacevic@univ.com','$2b$10$0GujCYZYOyuEJLcEY4lmGORX8VVTQiGhDwY7DIThdFyHPeHCSrRMu','',2),
+('Toni','Đurić','toni.djuric@univ.com','$2b$10$3CkAqMr6Wkb7NRH7nFjwguTaO9zWafLH7JHsqcjBQcRIxgKoFo0ey','',2),
+('Marta','Knežević','marta.knezevic@univ.com','$2b$10$E0YRKXgaTWjIL/dFACC.le47AI1uN.ZvAuGQeLYROsu6BM4ING60G','',1),
+('Mihael','Prlić','mihael.prlic@univ.com','$2b$10$hu2h1A5XThDxlC7WT4VKrOybJfd0fG/RZS6g9sm/wcaCBSZpGt/ii','',2),
+('Lea','Milinović','lea.milinovic@univ.com','$2b$10$xUv8q3/phK/w7HiJ9hg3xeeHQOjp/ruxLLQwpVcjv.2RfEDqMreei','',1);
 
 -- 7. Prostorije
 INSERT INTO prostorija (naziv, kapacitet) VALUES

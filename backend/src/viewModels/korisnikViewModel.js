@@ -14,14 +14,18 @@ const loginUser = async (req, res) => {
   const { password } = req.body;
 
   try {
-    const result = await queryDatabase(
-      `SELECT * FROM ${
-        userType === `student` ? `student` : `profesor`
-      } WHERE email = $1 AND lozinka = $2`,
-      [email, password]
+    const passwordResult = await queryDatabase(
+      `SELECT lozinka FROM ${
+        userType === "student" ? `student` : `profesor`
+      } WHERE email = $1`,
+      [email]
     );
 
-    if (result.length === 0) {
+    const lozinkaIzBaze = passwordResult[0].lozinka;
+    
+    const validPassword = await bcrypt.compare(password, lozinkaIzBaze);
+
+    if (passwordResult.length === 0 || !validPassword) {
       return ERROR_CODE.NOT_AUTHORIZED(res);
     }
 
