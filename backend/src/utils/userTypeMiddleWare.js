@@ -5,7 +5,7 @@ export default async function determineUserType(req, res, next) {
   const { email } = req.body;
 
   if (!email) {
-    return ERROR_CODE.INVALID_EMAIL(res, "Nije unesen e-mail.");
+    return ERROR_CODE.BAD_REQUEST(res, "Nije unesen e-mail.");
   }
 
   try {

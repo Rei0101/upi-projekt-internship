@@ -17,9 +17,11 @@ const userSlice = createSlice({
     setTermini: (state, action) => {
       state.termini = action.payload;
     },
-    setNotes: (state, action) => { 
-      state.notes = action.payload },
+    setNotes: (state, action) => {
+      state.notes = action.payload;
+    },
     setSviTermini: (state, action) => {
+
       state.svitermini = action.payload
     },setZahtjevi:(state,action)=>{
       state.zahtjevi=action.payload
@@ -27,9 +29,7 @@ const userSlice = createSlice({
     setKolokviji:(state,action)=>{
       state.kolokviji=action.payload
     },
-    
   },
-
 });
 
 export const { setUserEmail, setTermini, setNotes, setSviTermini,setKolokviji,setZahtjevi } = userSlice.actions;

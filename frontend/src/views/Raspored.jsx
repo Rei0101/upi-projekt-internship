@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/raspored.css";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import {
+  setTermini,
+  setSviTermini,
+  setNotes,
+  setKolokviji,
+} from "../redux/userSlice";
 
 function Raspored() {
   const days = [
@@ -14,20 +21,75 @@ function Raspored() {
     "Nedjelja",
   ];
 
-  const termini = useSelector((state) => state.user.termini.termini);
-  const svitermini = useSelector((state) => state.user.svitermini.grupe);
-  const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
-  const email = useSelector((state) => state.user.email);
-  const kolokviji = useSelector((state) => state.user.kolokviji.colloquiums);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const termini = useSelector((state) => state.user.termini?.termini || []);
+  const sviTermini = useSelector((state) => state.user.sviTermini?.grupe || []);
+  const notes = localStorage.getItem("notes");
+  
+  const email = localStorage.getItem("email");
+  const kolokviji = useSelector(
+    (state) => state.user.kolokviji?.colloquiums || []
+  );
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedTermin, setSelectedTermin] = useState(null);
   const [text, setText] = useState(notes || "");
   const [showAll, setShowAll] = useState(false);
-  const dispatch = useDispatch();
   const [participants, setParticipants] = useState([]);
   const [showParticipantsPopup, setShowParticipantsPopup] = useState(false);
   const [zahtjev, setZahtjev] = useState(useSelector((state) => state.user.zahtjevi));
-  
+
+  // potvrda token-a na refresh
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      try {
+        console.log(email);
+        
+        const [terminiRes, sviTerminiRes, notesRes, kolokvijiRes] =
+          await Promise.all([
+            axios.post(
+              "http://localhost:3000/api/korisnik/raspored",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/sve-grupe",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/todo",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/kolokviji",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+          ]);
+
+        // Update Redux store
+        dispatch(setTermini(terminiRes.data));
+        dispatch(setSviTermini(sviTerminiRes.data));
+        dispatch(setNotes(notesRes.data));
+        dispatch(setKolokviji(kolokvijiRes.data));
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    
+    fetchUserData();
+  }, [dispatch, navigate, email]);
+
   const handleEventClick = (event) => {
     setSelectedEvent(event);
   };
@@ -44,7 +106,7 @@ function Raspored() {
     setSelectedTermin(null);;
     setShowParticipantsPopup(false)
   };
-
+    
   const handleSave = async () => {
     if (!text.trim()) {
       alert("Bilješka ne može biti prazna!");
@@ -55,6 +117,8 @@ function Raspored() {
         email: email,
         noviZapis: text,
       });
+      localStorage.setItem("notes", text);
+      console.log("Zabilješka uspješno spremljena!");
     } catch (error) {
       console.error("Greška prilikom slanja zahtjeva:", error);
     }
@@ -69,7 +133,7 @@ function Raspored() {
     for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
       grid[dayIndex] = Array(5).fill(null);
       for (const termin of terminiData) {
-        if (termin.dan_u_tjednu.trim() === days[dayIndex].trim()) {
+        if (termin?.dan_u_tjednu?.trim() === days[dayIndex].trim()) {
           const startHour = parseInt(termin.pocetak.split(":")[0], 10);
           const eventIndex = startHour - 8;
 
@@ -189,14 +253,7 @@ function Raspored() {
             </li>
           ))}
         </ul>
-        {zahtjev.message!=="Nema zahtjeva za razmjenu." && (
-          <div>
-            <h3>Zahtjevi</h3>
-            {zahtjev.data[0].posiljatelj_ime} iz kolegija {zahtjev.data[0].kolegij} želi promijeniti {zahtjev.data[0].stara_grupa} za vašu {zahtjev.data[0].nova_grupa}
-            <button value="Accepted" onClick={(e) => handleResponse(e.target.value)}>Prihvati</button>
-            <button value="Rejected" onClick={(e) => handleResponse(e.target.value)}>Odbij</button>
-          </div>
-        )}
+
         {selectedEvent && (
           <div className="popup-overlay" onClick={handleClosePopup}>
             <div className="popup-content" onClick={(e) => e.stopPropagation()}>
@@ -221,49 +278,6 @@ function Raspored() {
               <p>
                 <strong>Prostorija:</strong> {selectedEvent.naziv_prostorije}
               </p>
-              <button onClick={handleClosePopup}>Zatvori</button>
-            </div>
-          </div>
-        )}
-
-        {selectedTermin && (
-          <div className="popup-overlay" onClick={handleClosePopup}>
-            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-              <h3>{selectedTermin.kolegij_naziv}</h3>
-              <p>
-                <strong>Popunjenost:</strong>{" "}
-                {selectedTermin.popunjenost_kapacitet}/
-                {selectedTermin.prostorija_kapacitet}
-              </p>
-              {selectedTermin.popunjenost_kapacitet !==
-                selectedTermin.prostorija_kapacitet &&
-                selectedTermin.kolegij_naziv.includes("Vježbe") && (
-                  <button onClick={handleChangeGroup}>Promijeni grupu</button>
-                )}
-              {selectedTermin.popunjenost_kapacitet ===
-                selectedTermin.prostorija_kapacitet && (
-                  <button onClick={handleShowParticipants}>Prikaži sudionike</button>
-                )}
-              <button onClick={handleClosePopup}>Zatvori</button>
-            </div>
-          </div>
-        )}
-        {showParticipantsPopup && (
-          <div className="popup-overlay" onClick={handleClosePopup}>
-            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-              <h3>Sudionici</h3>
-              <ul>
-                {participants.map((participant, index) => (
-                  <li key={index}>
-                    {participant}{" "}
-                    <button
-                      onClick={() => handleRequestExchange(participant)}
-                    >
-                      Zatraži zamjenu
-                    </button>
-                  </li>
-                ))}
-              </ul>
               <button onClick={handleClosePopup}>Zatvori</button>
             </div>
           </div>
