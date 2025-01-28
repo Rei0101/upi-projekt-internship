@@ -3,6 +3,7 @@ import "../css/raspored.css";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 
+
 function Raspored() {
   const days = [
     "Ponedjeljak",
@@ -13,7 +14,7 @@ function Raspored() {
     "Subota",
     "Nedjelja",
   ];
-
+  const tip = useSelector((state) => state.user.termini.userType)
   const termini = useSelector((state) => state.user.termini.termini);
   const svitermini = useSelector((state) => state.user.svitermini.grupe);
   const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
@@ -27,7 +28,28 @@ function Raspored() {
   const [participants, setParticipants] = useState([]);
   const [showParticipantsPopup, setShowParticipantsPopup] = useState(false);
   const [zahtjev, setZahtjev] = useState(useSelector((state) => state.user.zahtjevi));
-  
+  const [showKolokvij, setshowkolokvij] = useState(false)
+  const [formData, setFormData] = useState({
+    kolegij: "",
+    grupa: "Grupa A",
+    pocetak: "",
+    kraj: "",
+    dvorana: "",
+    datum: ""
+  })
+  const [showtermin, setshowtermin] = useState(false)
+  const [formtermin, setformtermin] = useState({
+
+    kolegij: "",
+    grupa: "Grupa A",
+    pocetak: "",
+    kraj: "",
+    dan: ""
+
+  })
+  const handletermin = () => {
+    setshowtermin(true)
+  }
   const handleEventClick = (event) => {
     setSelectedEvent(event);
   };
@@ -43,8 +65,28 @@ function Raspored() {
     setSelectedEvent(null);
     setSelectedTermin(null);;
     setShowParticipantsPopup(false)
+    setshowkolokvij(false);
+    setshowtermin(false);
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleInputChangetermin = (e) => {
+    const { name, value } = e.target;
+    setformtermin((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+
+
+
+  const imenakolegija = Array.from(new Set(termini.map((t) => t.kolegij_naziv)))
   const handleSave = async () => {
     if (!text.trim()) {
       alert("Bilješka ne može biti prazna!");
@@ -171,6 +213,48 @@ function Raspored() {
       console.error("Greška pri slanju odgovora na zahtjev:", error);
     }
   }
+  const handlekolokvij = async () => {
+    setshowkolokvij(true)
+  }
+
+  const handleSubmit = async () => {
+    try {
+
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/novi-kolokvij",
+        {
+          email: email,
+          naziv_kolegija: formData.kolegij,
+          naziv_grupe: formData.grupa,
+          datum: formData.datum, //* (ovo je zadani format input polja tipa "date")
+          pocetak: formData.pocetak,
+          kraj: formData.kraj,
+          naziv_prostorije: formData.dvorana
+        }
+      );
+      console.log("Zahtjev uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška:", error);
+    }
+  }
+  const handleSubmittermin = async () => {
+    try {
+
+      const response = await axios.patch(
+        "http://localhost:3000/api/korisnik/promjena-termina",
+        {
+          profesor_email:email,
+          kolegij_naziv:formtermin.kolegij,
+          dan_u_tjednu:formtermin.dan,
+          pocetak:formtermin.pocetak,
+          kraj:formtermin.kraj,
+        }
+      );
+      console.log("Zahtjev uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška:", error);
+    }
+  }
   return (
     <>
       <div className="events">
@@ -189,12 +273,169 @@ function Raspored() {
             </li>
           ))}
         </ul>
-        {zahtjev.message!=="Nema zahtjeva za razmjenu." && (
+        {tip == "profesor" && (
+          <button onClick={handlekolokvij}>Zakaži termin kolokvija</button>
+        )}
+        {tip !== "profesor" && zahtjev.message !== "Nema zahtjeva za razmjenu." && (
           <div>
             <h3>Zahtjevi</h3>
             {zahtjev.data[0].posiljatelj_ime} iz kolegija {zahtjev.data[0].kolegij} želi promijeniti {zahtjev.data[0].stara_grupa} za vašu {zahtjev.data[0].nova_grupa}
             <button value="Accepted" onClick={(e) => handleResponse(e.target.value)}>Prihvati</button>
             <button value="Rejected" onClick={(e) => handleResponse(e.target.value)}>Odbij</button>
+          </div>
+        )}
+        {showtermin && (
+          <div className="popup-overlay" onClick={handleClosePopup}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Dodaj termin</h3>
+              <form>
+                <label>
+                  Ime kolegija:
+                  <select
+                    name="kolegij"
+                    value={formtermin.kolegij}
+                    onChange={handleInputChangetermin}
+                  >
+                    <option value="">Odaberite kolegij</option>
+                    {imenakolegija.map((kolegij, index) => (
+                      <option key={index} value={kolegij}>
+                        {kolegij}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <br />
+
+                <br />
+                <label>
+                  Početak:
+                  <input
+                    type="time"
+                    name="pocetak"
+                    value={formtermin.pocetak}
+                    onChange={handleInputChangetermin}
+                  />
+                </label>
+                <br />
+                <label>
+                  Kraj:
+                  <input
+                    type="time"
+                    name="kraj"
+                    value={formtermin.kraj}
+                    onChange={handleInputChangetermin}
+                  />
+                </label>
+                <br />
+                <br />
+                <label>
+                  Dan:
+                  <select
+                    name="dan"
+                    value={formtermin.dan}
+                    onChange={handleInputChangetermin}
+                  >
+                    <option value="">Odaberite dan</option>
+                    {days.map((dan, index) => (
+                      <option key={index} value={dan}>
+                        {dan}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <br />
+                <button type="button" onClick={handleSubmittermin}>
+                  Spremi
+                </button>
+                <button type="button" onClick={handleClosePopup}>
+                  Odustani
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+        {showKolokvij && (
+          <div className="popup-overlay" onClick={handleClosePopup}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Dodaj termin</h3>
+              <form>
+                <label>
+                  Ime kolegija:
+                  <select
+                    name="kolegij"
+                    value={formData.kolegij}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Odaberite kolegij</option>
+                    {imenakolegija.map((kolegij, index) => (
+                      <option key={index} value={kolegij}>
+                        {kolegij}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <br />
+                <label>
+                  Grupa:
+                  <select
+                    name="grupa"
+                    value={formData.grupa}
+                    onChange={handleInputChange}
+                  >
+                    <option value="Grupa A">Grupa A</option>
+                    <option value="Grupa B">Grupa B</option>
+                    <option value="Grupa C">Grupa C</option>
+                  </select>
+                </label>
+                <br />
+                <label>
+                  Početak:
+                  <input
+                    type="time"
+                    name="pocetak"
+                    value={formData.pocetak}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <br />
+                <label>
+                  Kraj:
+                  <input
+                    type="time"
+                    name="kraj"
+                    value={formData.kraj}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <br />
+                <label>
+                  Naziv dvorane:
+                  <input
+                    type="text"
+                    name="dvorana"
+                    value={formData.dvorana}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <br />
+                <label>
+                  Datum:
+                  <input
+                    type="date"
+                    name="datum"
+                    value={formData.datum}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <br />
+                <button type="button" onClick={handleSubmit}>
+                  Spremi
+                </button>
+                <button type="button" onClick={handleClosePopup}>
+                  Odustani
+                </button>
+              </form>
+            </div>
           </div>
         )}
         {selectedEvent && (
@@ -311,7 +552,10 @@ function Raspored() {
               </div>
             ))}
           </div>
+          {tip == "profesor" &&
+            <button value="termin" onClick={handletermin}>Promjena termina</button>}
         </div>
+
 
         <div className="side-container">
           <div className="text-area">
@@ -325,9 +569,11 @@ function Raspored() {
             <button onClick={handleSave}>Spremi</button>
           </div>
         </div>
+
       </div>
 
       <div className="checkbox-container">
+
         <label className="checkbox-label">
           <input
             type="checkbox"

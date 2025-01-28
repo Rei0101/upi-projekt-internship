@@ -25,6 +25,7 @@ export default function Login() {
       });
 
       const data = response.data;
+      console.log(data)
 
       if (data.success) {
         // Uspješna prijava
@@ -35,16 +36,20 @@ export default function Login() {
         const svitermini = sviterminiResponse.data
         const notesResponse = await axios.post("http://localhost:3000/api/korisnik/todo", { email });
         const notes = notesResponse.data;
+        
         const kolokvijiResponse=await axios.post("http://localhost:3000/api/korisnik/kolokviji",{email})
         const kolokviji=kolokvijiResponse.data;
-        const zahtjeviResponse=await axios.post("http://localhost:3000/api/korisnik/dobavi-zahtjev",{student_email:email})
-        const zahtjevi=zahtjeviResponse.data
+        if(termini.userType=="student")
+          {
+            const zahtjeviResponse=await axios.post("http://localhost:3000/api/korisnik/dobavi-zahtjev",{student_email:email})
+            const zahtjevi=zahtjeviResponse.data
+            dispatch(setZahtjevi(zahtjevi))
+          }
         // Sprema  u Redux store
         dispatch(setTermini(termini));
         dispatch(setSviTermini(svitermini));
         dispatch(setNotes(notes))
         dispatch(setKolokviji(kolokviji))
-        dispatch(setZahtjevi(zahtjevi))
         navigate("/raspored");
 
       } else {
