@@ -14,7 +14,7 @@ describe('generalViewModel', () => {
             const res = {
                 json: jest.fn(),
             };
-
+            
             getWelcomeMessage(req, res);
 
             expect(res.json).toHaveBeenCalledWith({
