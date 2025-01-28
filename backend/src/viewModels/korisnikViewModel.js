@@ -404,10 +404,19 @@ const sendExchangeRequest = async (req, res) => {
     posiljatelj_email,
     primatelj_email,
     kolegij_id,
-    stara_grupa_id,
-    nova_grupa_id,
+    stara_grupa_id:promjena_stara,
+    nova_grupa_id:promjena_nova,
   } = req.body;
 
+  const stara_grupa_id =
+  promjena_stara === "Grupa A" ? 1 :
+  promjena_stara === "Grupa B" ? 2 :
+  promjena_stara === "Grupa C" ? 3 : null;
+
+const nova_grupa_id =
+  promjena_nova === "Grupa A" ? 1 :
+  promjena_nova === "Grupa B" ? 2 :
+  promjena_nova === "Grupa C" ? 3 : null;
   try {
     const senderResult = await queryDatabase(
       "SELECT id FROM student WHERE email = $1",
@@ -581,27 +590,30 @@ const handleExchangeResponse = async (req, res) => {
         "UPDATE zahtjev_za_razmjenu SET status = 'Odobren' WHERE id = $1",
         [zahtjev.id]
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Zahtjev za razmjenu je odobren i grupe su zamijenjene.",
-      });
     } else if (odluka === "Declined") {
       await queryDatabase(
         "UPDATE zahtjev_za_razmjenu SET status = 'Odbijen' WHERE id = $1",
         [zahtjev.id]
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Zahtjev za razmjenu je odbijen.",
-      });
     } else {
       return ERROR_CODE.BAD_REQUEST(
         res,
         "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'."
       );
     }
+
+    // Briši zahtjev nakon donošenja odluke
+    await queryDatabase(
+      "DELETE FROM zahtjev_za_razmjenu WHERE id = $1",
+      [zahtjev.id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: odluka === "Accepted"
+        ? "Zahtjev za razmjenu je odobren i grupe su zamijenjene."
+        : "Zahtjev za razmjenu je odbijen.",
+    });
   } catch (error) {
     console.error(error);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
