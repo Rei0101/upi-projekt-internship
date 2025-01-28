@@ -176,4 +176,9 @@
     background-color: #0056b3;
   }
   
+  .termin
+  {
+    display: flex;
+    align-items: flex-start;
+  }
   
