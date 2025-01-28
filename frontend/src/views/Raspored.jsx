@@ -24,7 +24,10 @@ function Raspored() {
   const [text, setText] = useState(notes || "");
   const [showAll, setShowAll] = useState(false);
   const dispatch = useDispatch();
-
+  const [participants, setParticipants] = useState([]);
+  const [showParticipantsPopup, setShowParticipantsPopup] = useState(false);
+  const [zahtjev, setZahtjev] = useState(useSelector((state) => state.user.zahtjevi));
+  
   const handleEventClick = (event) => {
     setSelectedEvent(event);
   };
@@ -32,12 +35,14 @@ function Raspored() {
   const handleGridEventClick = (termin) => {
     if (showAll && termin) {
       setSelectedTermin(termin);
+      console.log(podatak)
     }
   };
 
   const handleClosePopup = () => {
     setSelectedEvent(null);
-    setSelectedTermin(null);
+    setSelectedTermin(null);;
+    setShowParticipantsPopup(false)
   };
 
   const handleSave = async () => {
@@ -71,6 +76,10 @@ function Raspored() {
           if (eventIndex >= 0 && eventIndex < grid[dayIndex].length) {
             grid[dayIndex][eventIndex] = {
               kolegij_naziv: termin.kolegij_naziv,
+              grupa_naziv: termin.grupa_naziv,
+              pocetak: termin.pocetak,
+              kraj: termin.kraj,
+              prostorija_naziv: termin.rsprostorija_naziv,
               type: termin.kolegij_naziv.includes("Predavanja")
                 ? "predavanje"
                 : "vjezbe",
@@ -91,19 +100,18 @@ function Raspored() {
     }
 
     const { kolegij_id, grupa_naziv } = selectedTermin;
-    const staritermin = termini.find((stari) => stari.kolegij_id == kolegij_id)
-    const stara_grupa_id = staritermin.grupa_naziv
-    const nova_grupa_id = grupa_naziv
-    
-    const student_email = email
-    console.log(student_email, kolegij_id, stara_grupa_id, nova_grupa_id)
+    const staritermin = termini.find((stari) => stari.kolegij_id == kolegij_id);
+    const stara_grupa_id = staritermin.grupa_naziv;
+    const nova_grupa_id = grupa_naziv;
+
+    const student_email = email;
+    console.log(student_email, kolegij_id, stara_grupa_id, nova_grupa_id);
     try {
       const promjena = await axios.patch("http://localhost:3000/api/korisnik/promjena-grupe", {
         student_email,
         kolegij_id,
         stara_grupa_id,
         nova_grupa_id,
-
       });
       console.log("Promjena grupe uspješna:", promjena.data);
     } catch (error) {
@@ -111,7 +119,58 @@ function Raspored() {
     }
   };
 
+  const handleShowParticipants = async () => {
+    try {
+      const kolegij_naziv = selectedTermin.kolegij_naziv
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/dobavi-sudionike", { kolegij_naziv }
+      );
+      const podaci = response.data.data
+      console.log(podaci)
+      const polaznici = podaci.find((grupa) => grupa.grupa_naziv === selectedTermin.grupa_naziv).sudionici
+      console.log(polaznici)
+      setParticipants(polaznici);
+      setShowParticipantsPopup(true)
 
+    } catch (error) {
+      console.error("Greška pri dohvaćanju polaznika:", error);
+    }
+  };
+  const handleRequestExchange = async (recipientEmail) => {
+    try {
+      const staritermin = termini.find((grupa) => grupa.kolegij_id === selectedTermin.kolegij_id).grupa_naziv
+      console.log(email, recipientEmail, selectedTermin.kolegij_id, staritermin, selectedTermin.grupa_naziv)
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/zahtjev-razmjene",
+        {
+          posiljatelj_email: email,
+          primatelj_email: recipientEmail,
+          kolegij_id: selectedTermin.kolegij_id,
+          stara_grupa_id: staritermin,
+          nova_grupa_id: selectedTermin.grupa_naziv,
+        }
+      );
+
+      console.log("Zahtjev za zamjenu uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška pri slanju zahtjeva za zamjenu:", error);
+    }
+  };
+  const handleResponse = async (value) => {
+    try {
+
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/obradi-zahtjev",
+        {
+          primatelj_email: email,
+          odluka: value
+        }
+      );
+      console.log("Zahtjev za odgovor uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška pri slanju odgovora na zahtjev:", error);
+    }
+  }
   return (
     <>
       <div className="events">
@@ -130,7 +189,14 @@ function Raspored() {
             </li>
           ))}
         </ul>
-
+        {zahtjev.message!=="Nema zahtjeva za razmjenu." && (
+          <div>
+            <h3>Zahtjevi</h3>
+            {zahtjev.data[0].posiljatelj_ime} iz kolegija {zahtjev.data[0].kolegij} želi promijeniti {zahtjev.data[0].stara_grupa} za vašu {zahtjev.data[0].nova_grupa}
+            <button value="Accepted" onClick={(e) => handleResponse(e.target.value)}>Prihvati</button>
+            <button value="Rejected" onClick={(e) => handleResponse(e.target.value)}>Odbij</button>
+          </div>
+        )}
         {selectedEvent && (
           <div className="popup-overlay" onClick={handleClosePopup}>
             <div className="popup-content" onClick={(e) => e.stopPropagation()}>
@@ -174,6 +240,30 @@ function Raspored() {
                 selectedTermin.kolegij_naziv.includes("Vježbe") && (
                   <button onClick={handleChangeGroup}>Promijeni grupu</button>
                 )}
+              {selectedTermin.popunjenost_kapacitet ===
+                selectedTermin.prostorija_kapacitet && (
+                  <button onClick={handleShowParticipants}>Prikaži sudionike</button>
+                )}
+              <button onClick={handleClosePopup}>Zatvori</button>
+            </div>
+          </div>
+        )}
+        {showParticipantsPopup && (
+          <div className="popup-overlay" onClick={handleClosePopup}>
+            <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Sudionici</h3>
+              <ul>
+                {participants.map((participant, index) => (
+                  <li key={index}>
+                    {participant}{" "}
+                    <button
+                      onClick={() => handleRequestExchange(participant)}
+                    >
+                      Zatraži zamjenu
+                    </button>
+                  </li>
+                ))}
+              </ul>
               <button onClick={handleClosePopup}>Zatvori</button>
             </div>
           </div>
@@ -199,15 +289,17 @@ function Raspored() {
                       onClick={() =>
                         handleGridEventClick(
                           svitermini.find(
-                            (t) => t.kolegij_naziv === event.kolegij_naziv &&
-                            t.dan_u_tjednu === days[dayIndex]
-                
+                            (t) =>
+                              t.kolegij_naziv === event.kolegij_naziv &&
+                              t.dan_u_tjednu === days[dayIndex]
                           )
-                          
                         )
                       }
                     >
-                      {event.kolegij_naziv}
+                      {event.kolegij_naziv} -
+                      {event.grupa_naziv}-
+                      {event.pocetak}-{event.kraj}
+                      -{event.prostorija_naziv}
                     </div>
                   ) : (
                     <div
