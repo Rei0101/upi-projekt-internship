@@ -4,8 +4,14 @@ import useLogin from "../viewModels/useLogin";
 import { useState } from "react";
 
 function Login() {
-  const { email, setEmail, password, setPassword, error, handleLogin } =
-    useLogin();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    handleLogin,
+  } = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -22,6 +28,7 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="unesite e-mail"
             required
+           
           />
         </div>
         <div className="input-group">
@@ -33,8 +40,9 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="unesite lozinku"
             required
+          
           />
-
+          
           <Button
             type="button"
             className="toggle-password"
@@ -42,7 +50,8 @@ function Login() {
             text={showPassword ? "Sakrij" : "Prikaži"}
           />
         </div>
-
+        
+        
         {error && <p className="error-message">{error}</p>}
         <Button type="submit" text="Prijavi se" />
       </form>

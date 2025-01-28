@@ -14,87 +14,48 @@ export default function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      setError("Oba polja su obavezna!");
+      setError('Oba polja su obavezna!');
       return;
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/korisnik/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await axios.post("http://localhost:3000/api/korisnik/login", {
+        email,
+        password,
+      });
 
       const data = response.data;
 
-      localStorage.setItem("email", email);
-      localStorage.setItem("token", data.token);
-
       if (data.success) {
         // Uspješna prijava
-        dispatch(setUserEmail(email));
-        const terminiResponse = await axios.post(
-          "http://localhost:3000/api/korisnik/raspored",
-          { email },
-          {
-            headers: {
-              Authorization: `Bearer ${data.token}`
-            }
-          }
-        );
+        dispatch(setUserEmail(email))
+        const terminiResponse = await axios.post("http://localhost:3000/api/korisnik/raspored", { email });
         const termini = terminiResponse.data;
-        const sviTerminiResponse = await axios.post(
-          "http://localhost:3000/api/korisnik/sve-grupe",
-          { email },
-          {
-            headers: {
-              Authorization: `Bearer ${data.token}`
-            }
-          }
-        );
-        const sviTermini = sviTerminiResponse.data;
-        const notesResponse = await axios.post(
-          "http://localhost:3000/api/korisnik/todo",
-          { email },
-          {
-            headers: {
-              Authorization: `Bearer ${data.token}`
-            }
-          }
-        );
+        const sviterminiResponse = await axios.post("http://localhost:3000/api/korisnik/sve-grupe", { email });
+        const svitermini = sviterminiResponse.data
+        const notesResponse = await axios.post("http://localhost:3000/api/korisnik/todo", { email });
         const notes = notesResponse.data;
-        const kolokvijiResponse = await axios.post(
-          "http://localhost:3000/api/korisnik/kolokviji",
-          { email },
-          {
-            headers: {
-              Authorization: `Bearer ${data.token}`
-            }
-          }
-        );
-        const kolokviji = kolokvijiResponse.data;
+        const kolokvijiResponse=await axios.post("http://localhost:3000/api/korisnik/kolokviji",{email})
+        const kolokviji=kolokvijiResponse.data;
         const zahtjeviResponse=await axios.post("http://localhost:3000/api/korisnik/dobavi-zahtjev",{student_email:email})
         const zahtjevi=zahtjeviResponse.data
-        
-        localStorage.setItem("notes", notes.note[0].todo_zapis);
-
         // Sprema  u Redux store
         dispatch(setTermini(termini));
-        dispatch(setSviTermini(sviTermini));
-        dispatch(setNotes(notes));
-        dispatch(setKolokviji(kolokviji));
+        dispatch(setSviTermini(svitermini));
+        dispatch(setNotes(notes))
+        dispatch(setKolokviji(kolokviji))
         dispatch(setZahtjevi(zahtjevi))
         navigate("/raspored");
+
       } else {
         setError(data.message || "Došlo je do pogreške prilikom prijave!");
       }
     } catch (error) {
       setError("Neispravno korisničko ime ili lozinka!");
       console.error(error);
+
     }
-  };
+  }
 
   return {
     email,
@@ -102,6 +63,6 @@ export default function Login() {
     password,
     setPassword,
     error,
-    handleLogin,
-  };
+    handleLogin
+  }
 }
