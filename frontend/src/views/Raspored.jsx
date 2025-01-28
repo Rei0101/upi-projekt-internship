@@ -26,10 +26,6 @@ function Raspored() {
 
   const termini = useSelector((state) => state.user.termini?.termini || []);
   const sviTermini = useSelector((state) => state.user.sviTermini?.grupe || []);
-  /* const notes = useSelector(
-    (state) => state.user.notes?.note?.[0]?.todo_zapis || ""
-  ); */
-  //const email = useSelector((state) => state.user.email || "");
   const notes = localStorage.getItem("notes");
   
   const email = localStorage.getItem("email");
@@ -37,6 +33,12 @@ function Raspored() {
     (state) => state.user.kolokviji?.colloquiums || []
   );
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedTermin, setSelectedTermin] = useState(null);
+  const [text, setText] = useState(notes || "");
+  const [showAll, setShowAll] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [showParticipantsPopup, setShowParticipantsPopup] = useState(false);
+  const [zahtjev, setZahtjev] = useState(useSelector((state) => state.user.zahtjevi));
 
   // potvrda token-a na refresh
   useEffect(() => {
@@ -92,17 +94,24 @@ function Raspored() {
     setSelectedEvent(event);
   };
 
-  const handleClosePopup = () => {
-    setSelectedEvent(null);
+  const handleGridEventClick = (termin) => {
+    if (showAll && termin) {
+      setSelectedTermin(termin);
+      console.log(podatak)
+    }
   };
 
-  const [text, setText] = useState(notes);
-
-  const [showAll, setShowAll] = useState(false);
-
-  const handleSave = async () => {
-    console.log(email, text);
+  const handleClosePopup = () => {
+    setSelectedEvent(null);
+    setSelectedTermin(null);;
+    setShowParticipantsPopup(false)
+  };
     
+  const handleSave = async () => {
+    if (!text.trim()) {
+      alert("Bilješka ne može biti prazna!");
+      return;
+    }
     try {
       await axios.put("http://localhost:3000/api/korisnik/novi-todo", {
         email: email,
@@ -117,7 +126,6 @@ function Raspored() {
 
   const mapTerminiToGrid = (terminiData) => {
     if (!Array.isArray(terminiData) || terminiData.length === 0) {
-      console.warn("Nema termina za prikaz.");
       return [];
     }
 
@@ -132,12 +140,14 @@ function Raspored() {
           if (eventIndex >= 0 && eventIndex < grid[dayIndex].length) {
             grid[dayIndex][eventIndex] = {
               kolegij_naziv: termin.kolegij_naziv,
+              grupa_naziv: termin.grupa_naziv,
+              pocetak: termin.pocetak,
+              kraj: termin.kraj,
+              prostorija_naziv: termin.rsprostorija_naziv,
               type: termin.kolegij_naziv.includes("Predavanja")
                 ? "predavanje"
                 : "vjezbe",
             };
-          } else {
-            console.warn(`Termin izvan raspona: ${termin}`);
           }
         }
       }
@@ -145,8 +155,86 @@ function Raspored() {
     return grid;
   };
 
-  const gridData = mapTerminiToGrid(showAll ? sviTermini : termini);
+  const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
 
+  const handleChangeGroup = async () => {
+    if (!selectedTermin) {
+      console.error("Nijedan termin nije odabran.");
+      return;
+    }
+
+    const { kolegij_id, grupa_naziv } = selectedTermin;
+    const staritermin = termini.find((stari) => stari.kolegij_id == kolegij_id);
+    const stara_grupa_id = staritermin.grupa_naziv;
+    const nova_grupa_id = grupa_naziv;
+
+    const student_email = email;
+    console.log(student_email, kolegij_id, stara_grupa_id, nova_grupa_id);
+    try {
+      const promjena = await axios.patch("http://localhost:3000/api/korisnik/promjena-grupe", {
+        student_email,
+        kolegij_id,
+        stara_grupa_id,
+        nova_grupa_id,
+      });
+      console.log("Promjena grupe uspješna:", promjena.data);
+    } catch (error) {
+      console.error("Greška prilikom promjene grupe:", error);
+    }
+  };
+
+  const handleShowParticipants = async () => {
+    try {
+      const kolegij_naziv = selectedTermin.kolegij_naziv
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/dobavi-sudionike", { kolegij_naziv }
+      );
+      const podaci = response.data.data
+      console.log(podaci)
+      const polaznici = podaci.find((grupa) => grupa.grupa_naziv === selectedTermin.grupa_naziv).sudionici
+      console.log(polaznici)
+      setParticipants(polaznici);
+      setShowParticipantsPopup(true)
+
+    } catch (error) {
+      console.error("Greška pri dohvaćanju polaznika:", error);
+    }
+  };
+  const handleRequestExchange = async (recipientEmail) => {
+    try {
+      const staritermin = termini.find((grupa) => grupa.kolegij_id === selectedTermin.kolegij_id).grupa_naziv
+      console.log(email, recipientEmail, selectedTermin.kolegij_id, staritermin, selectedTermin.grupa_naziv)
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/zahtjev-razmjene",
+        {
+          posiljatelj_email: email,
+          primatelj_email: recipientEmail,
+          kolegij_id: selectedTermin.kolegij_id,
+          stara_grupa_id: staritermin,
+          nova_grupa_id: selectedTermin.grupa_naziv,
+        }
+      );
+
+      console.log("Zahtjev za zamjenu uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška pri slanju zahtjeva za zamjenu:", error);
+    }
+  };
+  const handleResponse = async (value) => {
+    try {
+
+      const response = await axios.post(
+        "http://localhost:3000/api/korisnik/obradi-zahtjev",
+        {
+          primatelj_email: email,
+          odluka: value
+        }
+      );
+      console.log("Zahtjev za odgovor uspješan:", response.data);
+    } catch (error) {
+      console.error("Greška pri slanju odgovora na zahtjev:", error);
+    }
+  }
   return (
     <>
       <div className="events">
@@ -210,19 +298,28 @@ function Raspored() {
                   event !== null ? (
                     <div
                       key={`${dayIndex}-${eventIndex}`}
-                      className={`grid-cell ${
-                        event.type === "predavanje" ? "yellow" : "red"
-                      }`}
+                      className={`grid-cell ${event.type === "predavanje" ? "yellow" : "red"
+                        }`}
+                      onClick={() =>
+                        handleGridEventClick(
+                          svitermini.find(
+                            (t) =>
+                              t.kolegij_naziv === event.kolegij_naziv &&
+                              t.dan_u_tjednu === days[dayIndex]
+                          )
+                        )
+                      }
                     >
-                      {event.kolegij_naziv}
+                      {event.kolegij_naziv} -
+                      {event.grupa_naziv}-
+                      {event.pocetak}-{event.kraj}
+                      -{event.prostorija_naziv}
                     </div>
                   ) : (
                     <div
                       key={`${dayIndex}-${eventIndex}`}
                       className="grid-cell"
-                    >
-                      {/* Empty Slot */}
-                    </div>
+                    ></div>
                   )
                 )}
               </div>

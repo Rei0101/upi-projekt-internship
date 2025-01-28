@@ -6,8 +6,9 @@ const userSlice = createSlice({
     email: "",
     termini: [],
     notes: "",
-    sviTermini: [],
-    kolokviji: [],
+    svitermini: [],
+    kolokviji:[],
+    zahtjevi:[]
   },
   reducers: {
     setUserEmail: (state, action) => {
@@ -20,19 +21,16 @@ const userSlice = createSlice({
       state.notes = action.payload;
     },
     setSviTermini: (state, action) => {
-      state.sviTermini = action.payload;
+
+      state.svitermini = action.payload
+    },setZahtjevi:(state,action)=>{
+      state.zahtjevi=action.payload
     },
-    setKolokviji: (state, action) => {
-      state.kolokviji = action.payload;
+    setKolokviji:(state,action)=>{
+      state.kolokviji=action.payload
     },
   },
 });
 
-export const {
-  setUserEmail,
-  setTermini,
-  setNotes,
-  setSviTermini,
-  setKolokviji,
-} = userSlice.actions;
+export const { setUserEmail, setTermini, setNotes, setSviTermini,setKolokviji,setZahtjevi } = userSlice.actions;
 export default userSlice.reducer;

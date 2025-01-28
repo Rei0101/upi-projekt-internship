@@ -12,6 +12,7 @@ import {
   getColloquium,
   newColloquium,
   changeSchedule,
+  getGroupAndParticipants
 } from "../viewModels/korisnikViewModel.js";
 import { authenticateToken } from "../utils/authMiddleware.js";
 import userTypeMiddleWare from "../utils/userTypeMiddleWare.js";
@@ -30,6 +31,7 @@ router.post(
 router.post("/todo", authenticateToken, userTypeMiddleWare, getToDo);
 router.put("/novi-todo", userTypeMiddleWare, updateToDo);
 
+router.post("/dobavi-sudionike", getGroupAndParticipants);
 router.patch("/promjena-grupe", changeGroup);
 router.post("/zahtjev-razmjene", sendExchangeRequest);
 router.post("/dobavi-zahtjev", getExchangeRequests);

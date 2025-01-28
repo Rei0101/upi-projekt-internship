@@ -261,8 +261,88 @@ const updateToDo = async (req, res) => {
   }
 };
 
+const getGroupAndParticipants = async (req, res) => {
+  const { kolegij_naziv } = req.body;
+
+  console.log("Query parametri:", req.body);
+
+  console.log("Naziv kolegija:", kolegij_naziv);
+
+
+  try {
+    // Provjera postojanja kolegija po nazivu
+    const kolegijResult = await queryDatabase(
+      "SELECT id FROM kolegij WHERE naziv = $1",
+      [kolegij_naziv]
+    );
+    if (kolegijResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Kolegij s danim nazivom ne postoji."
+      );
+    }
+
+    const kolegij_id = kolegijResult[0].id;
+
+    // Dohvati grupe povezane s kolegijem
+    const grupaResult = await queryDatabase(
+      `SELECT g.id AS grupa_id, g.naziv AS grupa_naziv
+       FROM grupa g
+       JOIN kolegij_grupa_profesor kgp ON g.id = kgp.grupa_id
+       WHERE kgp.kolegij_id = $1`,
+      [kolegij_id]
+    );
+
+    if (grupaResult.length === 0) {
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Nema grupa povezanih s danim kolegijem."
+      );
+    }
+
+    // Dohvati sudionike (studente) i njihove emailove za svaku grupu
+    const groupsWithParticipants = await Promise.all(
+      grupaResult.map(async (grupa) => {
+        const studentiResult = await queryDatabase(
+          `SELECT s.email
+           FROM student s
+           JOIN student_kolegij_grupa skg ON s.id = skg.student_id
+           WHERE skg.grupa_id = $1 AND skg.kolegij_id = $2`,
+          [grupa.grupa_id, kolegij_id]
+        );
+
+        return {
+          grupa_naziv: grupa.grupa_naziv,
+          sudionici: studentiResult.map((student) => student.email),
+        };
+      })
+    );
+
+    // Vraćanje rezultata
+    res.status(200).json({
+      success: true,
+      data: groupsWithParticipants,
+    });
+  } catch (error) {
+    console.error(error);
+    return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
+  }
+};
+
+
+
+
 const changeGroup = async (req, res) => {
-  const { student_email, kolegij_id, stara_grupa_id, nova_grupa_id } = req.body;
+  const { student_email, kolegij_id, stara_grupa_id:promjena_stara, nova_grupa_id:promjena_nova } = req.body;
+  const stara_grupa_id =
+  promjena_stara === "Grupa A" ? 1 :
+  promjena_stara === "Grupa B" ? 2 :
+  promjena_stara === "Grupa C" ? 3 : null;
+
+const nova_grupa_id =
+  promjena_nova === "Grupa A" ? 1 :
+  promjena_nova === "Grupa B" ? 2 :
+  promjena_nova === "Grupa C" ? 3 : null;
 
   try {
     console.log("Podaci primljeni u zahtjevu:", {
@@ -340,10 +420,19 @@ const sendExchangeRequest = async (req, res) => {
     posiljatelj_email,
     primatelj_email,
     kolegij_id,
-    stara_grupa_id,
-    nova_grupa_id,
+    stara_grupa_id:promjena_stara,
+    nova_grupa_id:promjena_nova,
   } = req.body;
 
+  const stara_grupa_id =
+  promjena_stara === "Grupa A" ? 1 :
+  promjena_stara === "Grupa B" ? 2 :
+  promjena_stara === "Grupa C" ? 3 : null;
+
+const nova_grupa_id =
+  promjena_nova === "Grupa A" ? 1 :
+  promjena_nova === "Grupa B" ? 2 :
+  promjena_nova === "Grupa C" ? 3 : null;
   try {
     const senderResult = await queryDatabase(
       "SELECT id FROM student WHERE email = $1",
@@ -517,27 +606,30 @@ const handleExchangeResponse = async (req, res) => {
         "UPDATE zahtjev_za_razmjenu SET status = 'Odobren' WHERE id = $1",
         [zahtjev.id]
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Zahtjev za razmjenu je odobren i grupe su zamijenjene.",
-      });
     } else if (odluka === "Declined") {
       await queryDatabase(
         "UPDATE zahtjev_za_razmjenu SET status = 'Odbijen' WHERE id = $1",
         [zahtjev.id]
       );
-
-      return res.status(200).json({
-        success: true,
-        message: "Zahtjev za razmjenu je odbijen.",
-      });
     } else {
       return ERROR_CODE.BAD_REQUEST(
         res,
         "Neispravna odluka. Dozvoljene vrijednosti su 'Odobren' ili 'Odbijen'."
       );
     }
+
+    // Briši zahtjev nakon donošenja odluke
+    await queryDatabase(
+      "DELETE FROM zahtjev_za_razmjenu WHERE id = $1",
+      [zahtjev.id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: odluka === "Accepted"
+        ? "Zahtjev za razmjenu je odobren i grupe su zamijenjene."
+        : "Zahtjev za razmjenu je odbijen.",
+    });
   } catch (error) {
     console.error(error);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
@@ -787,4 +879,5 @@ export {
   getColloquium,
   newColloquium,
   changeSchedule,
+  getGroupAndParticipants
 };
