@@ -14,20 +14,26 @@ function NOT_AUTHORIZED(res, mes = "Nije autoriziran pristup ovom resursu.") {
   });
 }
 
-
-function CONFLICT(res, mes = "Došlo je do konflikta u zahtjevu.") {
-  return res.status(409).json({
+function FORBIDDEN(res, mes = "Pristup odbijen.") {
+  return res.status(403).json({
     success: false,
-    errorCode: "CONFLICT",
+    errorCode: "FORBIDDEN",
     message: mes,
   });
 }
-
 
 function NOT_FOUND(res, mes = "Nisu pronađeni traženi resursi.") {
   return res.status(404).json({
     success: false,
     errorCode: "NOT_FOUND",
+    message: mes,
+  });
+}
+
+function CONFLICT(res, mes = "Došlo je do konflikta u zahtjevu.") {
+  return res.status(409).json({
+    success: false,
+    errorCode: "CONFLICT",
     message: mes,
   });
 }
@@ -42,8 +48,9 @@ function INTERNAL_SERVER_ERROR(res, mes = "Greška pri dohvaćanju podataka.") {
 
 export {
   BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
   NOT_AUTHORIZED,
-  CONFLICT
+  FORBIDDEN,
+  NOT_FOUND,
+  CONFLICT,
+  INTERNAL_SERVER_ERROR,
 };

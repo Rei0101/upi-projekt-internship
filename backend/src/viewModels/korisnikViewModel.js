@@ -1,8 +1,8 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
-import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import prevoditelj from "../utils/prijevodDana.js";
 import provjeraUnosa from "../utils/provjeraUnosa.js";
 import provjeraFormata from "../utils/provjeraFormata.js";
@@ -22,7 +22,7 @@ const loginUser = async (req, res) => {
     );
 
     const lozinkaIzBaze = passwordResult[0].lozinka;
-    
+
     const validPassword = await bcrypt.compare(password, lozinkaIzBaze);
 
     if (passwordResult.length === 0 || !validPassword) {
@@ -30,15 +30,15 @@ const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { email: email, userType: userType }, 
+      { email: email, userType: userType },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRATION ||"1h" } 
+      { expiresIn: process.env.JWT_EXPIRATION || "1h" }
     );
 
     res.json({
       success: true,
       message: "Login successful.",
-      token
+      token,
     });
   } catch (error) {
     console.error("Greška pri prijavi:", error.stack);
@@ -596,7 +596,6 @@ const getColloquium = async (req, res) => {
         dan_u_tjednu: prevoditelj.naHrvatski(kolokvij.dan_u_tjednu),
       })),
     });
-
   } catch (error) {
     console.error("Greška pri dohvaćanju kolokvija:", error.stack);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
@@ -617,14 +616,22 @@ const newColloquium = async (req, res) => {
    * }
    */
 
-  const { email, naziv_kolegija, naziv_grupe, datum, pocetak, kraj, naziv_prostorije } = req.body;
+  const {
+    email,
+    naziv_kolegija,
+    naziv_grupe,
+    datum,
+    pocetak,
+    kraj,
+    naziv_prostorije,
+  } = req.body;
 
   try {
     const emailResult = await queryDatabase(
       "SELECT id FROM profesor WHERE email = $1",
       [email]
     );
-    
+
     if (emailResult.length === 0) {
       return ERROR_CODE.NOT_FOUND(
         res,
@@ -632,11 +639,12 @@ const newColloquium = async (req, res) => {
       );
     }
 
-    const [provjera_kolegija, provjera_grupe, provjera_prostorije] = await Promise.all([
-      provjeraUnosa("kolegij", naziv_kolegija),
-      provjeraUnosa("grupa", naziv_grupe),
-      provjeraUnosa("prostorija", naziv_prostorije)
-    ]);    
+    const [provjera_kolegija, provjera_grupe, provjera_prostorije] =
+      await Promise.all([
+        provjeraUnosa("kolegij", naziv_kolegija),
+        provjeraUnosa("grupa", naziv_grupe),
+        provjeraUnosa("prostorija", naziv_prostorije),
+      ]);
 
     if (provjera_kolegija[0] || provjera_grupe[0] || provjera_prostorije[0]) {
       return ERROR_CODE.NOT_FOUND(res);
@@ -645,13 +653,20 @@ const newColloquium = async (req, res) => {
     const formatError = provjeraFormata(datum, pocetak, kraj);
 
     if (formatError) {
-      return ERROR_CODE.BAD_REQUEST(res, formatError)
+      return ERROR_CODE.BAD_REQUEST(res, formatError);
     }
-    
+
     await queryDatabase(
       `INSERT INTO kolokvij (kolegij_id, grupa_id, datum, dan_u_tjednu, pocetak, kraj, prostorija_id) VALUES
       ($1, $2, $3, TO_CHAR($3::DATE, 'FMDay'), $4, $5, $6)`,
-      [provjera_kolegija[1], provjera_grupe[1], datum, pocetak, kraj, provjera_prostorije[1]]
+      [
+        provjera_kolegija[1],
+        provjera_grupe[1],
+        datum,
+        pocetak,
+        kraj,
+        provjera_prostorije[1],
+      ]
     );
 
     return res.status(200).json({
@@ -662,10 +677,11 @@ const newColloquium = async (req, res) => {
     console.error(error);
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
-}
+};
 
 const changeSchedule = async (req, res) => {
-  const { profesor_email, kolegij_naziv, dan_u_tjednu, pocetak, kraj } = req.body;
+  const { profesor_email, kolegij_naziv, dan_u_tjednu, pocetak, kraj } =
+    req.body;
 
   try {
     console.log("Podaci primljeni u zahtjevu:", {
@@ -682,7 +698,10 @@ const changeSchedule = async (req, res) => {
     );
 
     if (profesorResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Profesor s danim e-mail-om ne postoji.");
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Profesor s danim e-mail-om ne postoji."
+      );
     }
     const profesor_id = profesorResult[0].id;
 
@@ -714,9 +733,11 @@ const changeSchedule = async (req, res) => {
     );
 
     if (conflictCheck.length > 0) {
-      return ERROR_CODE.CONFLICT(res, "Termini se preklapaju. Promjena termina nije moguća.");
+      return ERROR_CODE.CONFLICT(
+        res,
+        "Termini se preklapaju. Promjena termina nije moguća."
+      );
     }
-
 
     const terminResult = await queryDatabase(
       "SELECT id FROM termin WHERE kolegij_id = $1",
@@ -724,7 +745,10 @@ const changeSchedule = async (req, res) => {
     );
 
     if (terminResult.length === 0) {
-      return ERROR_CODE.NOT_FOUND(res, "Termin koji želite promijeniti ne postoji.");
+      return ERROR_CODE.NOT_FOUND(
+        res,
+        "Termin koji želite promijeniti ne postoji."
+      );
     }
     const termin_id = terminResult[0].id;
 
@@ -734,7 +758,10 @@ const changeSchedule = async (req, res) => {
     );
 
     if (updateResult.rowCount === 0) {
-      return ERROR_CODE.BAD_REQUEST(res, "Promjena termina nije uspjela. Provjerite unesene podatke.");
+      return ERROR_CODE.BAD_REQUEST(
+        res,
+        "Promjena termina nije uspjela. Provjerite unesene podatke."
+      );
     }
 
     res.status(200).json({
@@ -746,7 +773,6 @@ const changeSchedule = async (req, res) => {
     return ERROR_CODE.INTERNAL_SERVER_ERROR(res);
   }
 };
-
 
 export {
   loginUser,
@@ -760,5 +786,5 @@ export {
   handleExchangeResponse,
   getColloquium,
   newColloquium,
-  changeSchedule
+  changeSchedule,
 };

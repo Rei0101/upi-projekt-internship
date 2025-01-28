@@ -7,7 +7,7 @@ const userSlice = createSlice({
     termini: [],
     notes: "",
     sviTermini: [],
-    kolokviji:[]
+    kolokviji: [],
   },
   reducers: {
     setUserEmail: (state, action) => {
@@ -16,17 +16,23 @@ const userSlice = createSlice({
     setTermini: (state, action) => {
       state.termini = action.payload;
     },
-    setNotes: (state, action) => { 
-      state.notes = action.payload },
-    setSviTermini: (state, action) => {
-      state.sviTermini = action.payload
+    setNotes: (state, action) => {
+      state.notes = action.payload;
     },
-    setKolokviji:(state,action)=>{
-      state.kolokviji=action.payload
-    }
+    setSviTermini: (state, action) => {
+      state.sviTermini = action.payload;
+    },
+    setKolokviji: (state, action) => {
+      state.kolokviji = action.payload;
+    },
   },
-
 });
 
-export const { setUserEmail, setTermini, setNotes, setSviTermini,setKolokviji } = userSlice.actions;
+export const {
+  setUserEmail,
+  setTermini,
+  setNotes,
+  setSviTermini,
+  setKolokviji,
+} = userSlice.actions;
 export default userSlice.reducer;
