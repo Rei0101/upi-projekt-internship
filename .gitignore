@@ -25,10 +25,10 @@ Thumbs.db
 # Frontend build output (Vite, React)
 frontend/dist/
 
-# Backend .env files
-backend/.env
-backend/.env.local
-backend/.env.*.local
+# Frontend .env files
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
 
 # IDE/Editor-specific files
 .idea/
