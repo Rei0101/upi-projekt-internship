@@ -28,7 +28,7 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       { email: email, userType: userType },
       "kljuc-rasporeda",
-      { expiresIn: "1m" }
+      { expiresIn: "1h" }
     );
 
     res.json({
