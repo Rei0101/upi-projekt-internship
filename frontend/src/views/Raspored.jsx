@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../css/raspored.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  setTermini,
+  setSviTermini,
+  setNotes,
+  setKolokviji,
+  setZahtjevi
+} from "../redux/userSlice";
 
 
 function Raspored() {
+  const navigate = useNavigate();
+
   const days = [
     "Ponedjeljak",
     "Utorak",
@@ -14,12 +24,13 @@ function Raspored() {
     "Subota",
     "Nedjelja",
   ];
-  const tip = useSelector((state) => state.user.termini.userType)
-  const termini = useSelector((state) => state.user.termini.termini);
-  const svitermini = useSelector((state) => state.user.svitermini.grupe);
-  const notes = useSelector((state) => state.user.notes.note[0].todo_zapis);
-  const email = useSelector((state) => state.user.email);
-  const kolokviji = useSelector((state) => state.user.kolokviji.colloquiums);
+
+  const tip = localStorage.getItem("tip");
+  const termini = JSON.parse(localStorage.getItem("termini"));
+  const svitermini = JSON.parse(localStorage.getItem("svitermini"));
+  const notes = localStorage.getItem("notes");
+  const email = localStorage.getItem("email");
+  const kolokviji = JSON.parse(localStorage.getItem("kolokviji")); 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedTermin, setSelectedTermin] = useState(null);
   const [text, setText] = useState(notes || "");
@@ -27,7 +38,7 @@ function Raspored() {
   const dispatch = useDispatch();
   const [participants, setParticipants] = useState([]);
   const [showParticipantsPopup, setShowParticipantsPopup] = useState(false);
-  const [zahtjev, setZahtjev] = useState(useSelector((state) => state.user.zahtjevi));
+  const zahtjev = JSON.parse(localStorage.getItem("zahtjev"));
   const [showKolokvij, setshowkolokvij] = useState(false)
   const [formData, setFormData] = useState({
     kolegij: "",
@@ -39,14 +50,79 @@ function Raspored() {
   })
   const [showtermin, setshowtermin] = useState(false)
   const [formtermin, setformtermin] = useState({
-
     kolegij: "",
     grupa: "Grupa A",
     pocetak: "",
     kraj: "",
     dan: ""
-
   })
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      try {
+        const [terminiRes, sviTerminiRes, notesRes, kolokvijiRes] =
+          await Promise.all([
+            axios.post(
+              "http://localhost:3000/api/korisnik/raspored",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/sve-grupe",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/todo",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.post(
+              "http://localhost:3000/api/korisnik/kolokviji",
+              { email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+          ]);
+        
+        localStorage.setItem("termini", JSON.stringify(terminiRes.data.termini));
+        localStorage.setItem("svitermini", JSON.stringify(sviTerminiRes.data.grupe));
+        localStorage.setItem("notes", notesRes.data.note[0].todo_zapis);
+        localStorage.setItem("kolokviji", JSON.stringify(kolokvijiRes.data.colloquiums));
+        console.log(termini);
+        
+        // Update Redux store
+        dispatch(setTermini(terminiRes.data));
+        dispatch(setSviTermini(sviTerminiRes.data));
+        dispatch(setNotes(notesRes.data));
+        dispatch(setKolokviji(kolokvijiRes.data));
+
+        if (tip === "student") {
+          const zahtjeviRes = axios.post(
+              "http://localhost:3000/api/korisnik/dobavi-zahtjev",
+              { student_email: email },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          localStorage.setItem("zahtjev", JSON.stringify(zahtjeviRes.data?.data !== undefined ? zahtjeviRes.data : {message: "Nema zahtjeva za razmjenu."}));
+          dispatch(setZahtjevi(zahtjeviRes?.data || {message: "Nema zahtjeva za razmjenu."}));
+        }
+        
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        navigate("/");
+        return;
+      }
+    };
+    
+    fetchUserData();
+  }, [dispatch, navigate, email]);
+
   const handletermin = () => {
     setshowtermin(true)
   }
@@ -57,7 +133,6 @@ function Raspored() {
   const handleGridEventClick = (termin) => {
     if (showAll && termin) {
       setSelectedTermin(termin);
-      console.log(podatak)
     }
   };
 
@@ -84,8 +159,6 @@ function Raspored() {
   };
 
 
-
-
   const imenakolegija = Array.from(new Set(termini.map((t) => t.kolegij_naziv)))
   const handleSave = async () => {
     if (!text.trim()) {
@@ -97,6 +170,8 @@ function Raspored() {
         email: email,
         noviZapis: text,
       });
+      localStorage.setItem("notes", text);
+      console.log("Zabilješka uspješno spremljena!");
     } catch (error) {
       console.error("Greška prilikom slanja zahtjeva:", error);
     }
@@ -200,7 +275,7 @@ function Raspored() {
   };
   const handleResponse = async (value) => {
     try {
-
+      console.log("a");
       const response = await axios.post(
         "http://localhost:3000/api/korisnik/obradi-zahtjev",
         {
@@ -208,6 +283,8 @@ function Raspored() {
           odluka: value
         }
       );
+      console.log(response);
+      
       console.log("Zahtjev za odgovor uspješan:", response.data);
     } catch (error) {
       console.error("Greška pri slanju odgovora na zahtjev:", error);
@@ -277,12 +354,17 @@ function Raspored() {
           <button onClick={handlekolokvij}>Zakaži termin kolokvija</button>
         )}
         {tip !== "profesor" && zahtjev.message !== "Nema zahtjeva za razmjenu." && (
-          <div>
-            <h3>Zahtjevi</h3>
-            {zahtjev.data[0].posiljatelj_ime} iz kolegija {zahtjev.data[0].kolegij} želi promijeniti {zahtjev.data[0].stara_grupa} za vašu {zahtjev.data[0].nova_grupa}
-            <button value="Accepted" onClick={(e) => handleResponse(e.target.value)}>Prihvati</button>
-            <button value="Rejected" onClick={(e) => handleResponse(e.target.value)}>Odbij</button>
-          </div>
+            (() => {
+              console.log(zahtjev); // Logs the entire data object
+              return (
+                <div>
+                  <h3>Zahtjevi</h3>
+                  {zahtjev.data[0].posiljatelj_ime} iz kolegija {zahtjev.data[0].kolegij} želi promijeniti {zahtjev.data[0].stara_grupa} za vašu {zahtjev.data[0].nova_grupa}
+                  <button value="Accepted" onClick={(e) => handleResponse(e.target.value)}>Prihvati</button>
+                  <button value="Declined" onClick={(e) => handleResponse(e.target.value)}>Odbij</button>
+                </div>
+              );
+            })()
         )}
         {showtermin && (
           <div className="popup-overlay" onClick={handleClosePopup}>

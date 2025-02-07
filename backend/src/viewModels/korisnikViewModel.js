@@ -1,5 +1,6 @@
 import { queryDatabase } from "../models/pool.js";
 import * as ERROR_CODE from "../utils/errorKodovi.js";
+import jwt from "jsonwebtoken";
 import prevoditelj from "../utils/prijevodDana.js";
 import provjeraUnosa from "../utils/provjeraUnosa.js";
 import provjeraFormata from "../utils/provjeraFormata.js";
@@ -9,20 +10,31 @@ const loginUser = async (req, res) => {
   const { password } = req.body;
 
   try {
-    const result = await queryDatabase(
-      `SELECT * FROM ${
-        userType === `student` ? `student` : `profesor`
-      } WHERE email = $1 AND lozinka = $2`,
-      [email, password]
+    const passwordResult = await queryDatabase(
+      `SELECT lozinka FROM ${
+        userType === "student" ? `student` : `profesor`
+      } WHERE email = $1`,
+      [email]
     );
 
-    if (result.length === 0) {
+    const lozinkaIzBaze = passwordResult[0].lozinka;
+
+    const validPassword = password === lozinkaIzBaze;
+
+    if (passwordResult.length === 0 || !validPassword) {
       return ERROR_CODE.NOT_AUTHORIZED(res);
     }
+
+    const token = jwt.sign(
+      { email: email, userType: userType },
+      "kljuc-rasporeda",
+      { expiresIn: "1m" }
+    );
 
     res.json({
       success: true,
       message: "Login successful.",
+      token,
     });
   } catch (error) {
     console.error("Greška pri prijavi:", error.stack);
@@ -548,6 +560,8 @@ const getExchangeRequests = async (req, res) => {
 };
 
 const handleExchangeResponse = async (req, res) => {
+  
+  
   const { primatelj_email, odluka } = req.body;
 
   try {
@@ -562,7 +576,7 @@ const handleExchangeResponse = async (req, res) => {
       );
     }
     const primatelj_id = recipientResult[0].id;
-
+    
     const exchangeRequestResult = await queryDatabase(
       "SELECT * FROM zahtjev_za_razmjenu WHERE primatelj_id = $1 AND status = 'Na čekanju'",
       [primatelj_id]
@@ -607,7 +621,7 @@ const handleExchangeResponse = async (req, res) => {
       "DELETE FROM zahtjev_za_razmjenu WHERE id = $1",
       [zahtjev.id]
     );
-
+    
     return res.status(200).json({
       success: true,
       message: odluka === "Accepted"

@@ -14,6 +14,13 @@ function NOT_AUTHORIZED(res, mes = "Nije autoriziran pristup ovom resursu.") {
   });
 }
 
+function FORBIDDEN(res, mes = "Pristup odbijen.") {
+  return res.status(403).json({
+    success: false,
+    errorCode: "FORBIDDEN",
+    message: mes,
+  });
+}
 
 function CONFLICT(res, mes = "Došlo je do konflikta u zahtjevu.") {
   return res.status(409).json({
@@ -42,8 +49,9 @@ function INTERNAL_SERVER_ERROR(res, mes = "Greška pri dohvaćanju podataka.") {
 
 export {
   BAD_REQUEST,
+  NOT_AUTHORIZED,
+  FORBIDDEN,
+  CONFLICT,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
-  NOT_AUTHORIZED,
-  CONFLICT
 };
