@@ -209,7 +209,6 @@ function Raspored() {
   };
 
   const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
-
   
   const handleChangeGroup = async () => {
     if (!selectedTermin) {
