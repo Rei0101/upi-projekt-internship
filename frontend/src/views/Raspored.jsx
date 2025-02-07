@@ -181,36 +181,35 @@ function Raspored() {
     if (!Array.isArray(terminiData) || terminiData.length === 0) {
       return [];
     }
-  
-    const grid = Array.from({ length: days.length }, () => Array(6).fill(null));
-  
-    for (const termin of terminiData) {
-      const dayIndex = days.findIndex(
-        (day) => day.trim() === termin.dan_u_tjednu.trim()
-      );
-      const startHour = parseInt(termin.pocetak.split(":")[0], 10);
-      console.log(startHour);
-      
-      const eventIndex = Math.floor((startHour - 8) / 2);
-      console.log(eventIndex);
-      if (dayIndex !== -1 && eventIndex >= 0 && eventIndex < grid[dayIndex].length) {
-        grid[dayIndex][eventIndex] = {
-          kolegij_naziv: termin.kolegij_naziv,
-          grupa_naziv: termin.grupa_naziv,
-          pocetak: termin.pocetak,
-          kraj: termin.kraj,
-          prostorija_naziv: termin.rsprostorija_naziv,
-          type: termin.kolegij_naziv.includes("Predavanja") ? "predavanje" : "vjezbe",
-        };
+    
+    const grid = [];
+    for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
+      grid[dayIndex] = Array(5).fill(null);
+      for (const termin of terminiData) {
+        if (termin.dan_u_tjednu.trim() === days[dayIndex].trim()) {
+          const startHour = parseInt(termin.pocetak.split(":")[0], 10);
+          const eventIndex = startHour - 8;
+
+          if (eventIndex >= 0 && eventIndex < grid[dayIndex].length) {
+            grid[dayIndex][eventIndex] = {
+              kolegij_naziv: termin.kolegij_naziv,
+              grupa_naziv: termin.grupa_naziv,
+              pocetak: termin.pocetak,
+              kraj: termin.kraj,
+              prostorija_naziv: termin.rsprostorija_naziv,
+              type: termin.kolegij_naziv.includes("Predavanja")
+                ? "predavanje"
+                : "vjezbe",
+            };
+          }
+        }
       }
     }
-  
     return grid;
   };
-  
 
   const gridData = mapTerminiToGrid(showAll ? svitermini : termini);
-  console.log(gridData);
+
   
   const handleChangeGroup = async () => {
     if (!selectedTermin) {
